@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLARE-SI · Fire safety insights from microgravity combustion data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b14;--panel:#0e1524;--panel2:#121b2e;--line:#1f2a42;--text:#e6ecf7;--muted:#8a97b0;--soft:#c7d1e4;--accent:#ff8a3d;--blue:#5aa9ff;--green:#3ddc97;--red:#ff5c6c;--amber:#ffc24a;--violet:#b7a9ff}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#16223d 0%,var(--bg) 60%) fixed;color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.5}
+a{color:var(--blue)}[data-go]{cursor:pointer}a[data-go]:not(.cta){text-decoration:underline}nav a[data-go]{text-decoration:none}
+nav{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 28px;background:rgba(7,11,20,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+nav .brand{font-weight:700;font-size:17px;margin-right:18px}nav .brand span{color:var(--accent)}
+nav a{color:var(--muted);text-decoration:none;font-weight:600;padding:7px 12px;border-radius:8px}
+nav a.on{background:#16213a;color:var(--text)}nav a:hover{color:var(--text)}
+main{padding:22px 28px 40px;max-width:1500px;margin:0 auto}
+.page{display:none}.page.on{display:block}
+h1{font-size:30px;line-height:1.2;margin:8px 0 10px;max-width:900px}h1 em{color:var(--accent);font-style:normal}
+h2.sec{font-size:19px;margin:28px 0 10px}
+.lead{font-size:16px;color:var(--soft);max-width:860px}
+.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h3{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:600}
+.card h4{margin:0 0 6px;font-size:15px}
+.grid{display:grid;gap:16px}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:1000px){.g3,.g2,.g4{grid-template-columns:1fr}}
+.stat .v{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:600;color:var(--accent)}.stat .k{color:var(--muted);font-size:12.5px}
+.cta{display:inline-block;margin-top:10px;padding:9px 14px;border-radius:10px;background:var(--accent);color:#1a0c02;font-weight:700;text-decoration:none;border:0;cursor:pointer;font:inherit;font-weight:700}
+.cta.ghost{background:#16213a;color:var(--text);border:1px solid var(--line)}
+.seg{display:flex;flex-wrap:wrap;background:#0a1120;border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg button{flex:1;background:none;border:0;color:var(--muted);padding:8px 10px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
+.seg button.on{background:var(--accent);color:#1a0c02}
+label.ctl{display:block;margin:14px 0 6px;font-weight:600;font-size:13px}.val{float:right;font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--accent)}
+select{width:100%;background:#0a1120;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+.btn{width:100%;margin-top:10px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#16213a;color:var(--text);font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{border-color:var(--accent)}.btn.warn{background:#2a1520;border-color:#5a2436}
+.hint{color:var(--muted);font-size:12px;margin-top:6px}
+canvas{width:100%;display:block;border-radius:10px;background:#04070e}
+.status{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.pill{padding:6px 12px;border-radius:999px;font-weight:700;font-size:12px;letter-spacing:.4px;border:1px solid transparent}
+.pill.s{background:#0f2e24;color:var(--green);border-color:#1d5a45}.pill.q{background:#0f2238;color:var(--blue);border-color:#1f4670}
+.pill.b{background:#33200f;color:var(--amber);border-color:#6b4519}.pill.n{background:#341319;color:var(--red);border-color:#6b2531}
+.pill.env-ok{background:#0f2e24;color:var(--green);border-color:#1d5a45;font-weight:600}.pill.env-x{background:#33200f;color:var(--amber);border-color:#6b4519;font-weight:600}.pill.env-m{background:#1d1b38;color:var(--violet);border-color:#3d3780;font-weight:600}
+.explain{margin-top:10px;color:var(--soft)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.kpi{background:#0a1120;border:1px solid var(--line);border-radius:10px;padding:10px}
+.kpi .k{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.8px}.kpi .v{font-family:'JetBrains Mono',monospace;font-size:14.5px;font-weight:600;margin-top:4px}.kpi .t{font-size:11px;color:var(--muted);margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.6px}th.sort{cursor:pointer}th.sort:hover{color:var(--text)}
+td.mono,.mono{font-family:'JetBrains Mono',monospace}
+.tw{overflow-x:auto}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}.legend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;border-radius:2px}
+.score{font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:600}
+.simwrap{display:grid;grid-template-columns:270px 1fr 440px;gap:16px}
+@media (max-width:1250px){.simwrap{grid-template-columns:270px 1fr}.simwrap .mapcol{grid-column:1/-1}}
+@media (max-width:800px){.simwrap{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+.rank{display:flex;gap:12px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;background:#0a1120}
+.rank:hover,.rank.on{border-color:var(--accent)}
+.rank .no{font-family:'JetBrains Mono',monospace;color:var(--muted);width:22px}
+.rank .bar{height:6px;border-radius:3px;background:#1a2540;margin-top:6px;overflow:hidden}.rank .bar i{display:block;height:100%;background:var(--accent)}
+.rank .why{color:var(--muted);font-size:12px;margin-top:4px}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--line);color:var(--soft);margin:0 4px 4px 0}
+.tag.Solid{color:#ffb27a;border-color:#6b4519}.tag.Droplet{color:var(--blue);border-color:#1f4670}.tag.Gas{color:var(--violet);border-color:#3d3780}.tag.Aerosol{color:var(--green);border-color:#1d5a45}.tag.Model{color:var(--muted)}
+dl{margin:8px 0 0;display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:13px}dt{color:var(--muted)}dd{margin:0}
+ul.notes{margin:0;padding-left:18px}ul.notes li{margin:5px 0;color:var(--soft)}
+.ev{font-size:12px;color:var(--muted);margin-top:6px}
+.pillar{border-left:3px solid var(--accent);padding-left:14px;margin:14px 0}
+footer{padding:18px 28px 30px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);max-width:1500px;margin:0 auto}
+svg text{font-family:Inter,sans-serif}
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">FLARE<span>-SI</span></div>
+  <a data-go="home" role="link" tabindex="0">Home</a><a data-go="dashboard" role="link" tabindex="0">Dashboard</a><a data-go="data" role="link" tabindex="0">Data</a><a data-go="simulation" role="link" tabindex="0">Simulation</a><a data-go="safety" role="link" tabindex="0">Fire safety</a><a data-go="about" role="link" tabindex="0">About</a>
+</nav>
+<main>
+
+<!-- ================= HOME ================= -->
+<section class="page on" id="page-home">
+  <div class="hint">2026 NASA Space Apps Challenge · Flame in Freefall: SI-Powered Fire Safety Insights from Microgravity Combustion Data</div>
+  <h1>Decades of NASA fire experiments in space, turned into <em>answers a habitat designer can use</em>.</h1>
+  <p class="lead">Fire behaves differently without gravity: no rising hot gas, no flickering teardrop, and a flame that lives or dies with the cabin ventilation. NASA has measured this in orbit for years, and the results sit in the Physical Sciences Informatics (PSI) repository. FLARE-SI summarises, ranks and interprets those investigations, and lets you test what they imply in a simulator built on the same data.</p>
+  <a class="cta" data-go="dashboard" role="link" tabindex="0">Open the dashboard</a> <a class="cta ghost" data-go="simulation" role="link" tabindex="0">Run the simulation</a>
+  <div class="grid g4" style="margin-top:22px" id="homestats"></div>
+  <h2 class="sec">What you can do here</h2>
+  <div class="grid g3">
+    <div class="card"><h4>Rank the research for your mission</h4><p>Pick a habitat (station, transit vehicle, surface base, rover) and a concern (prevention, detection, suppression). The dashboard ranks all investigations and explains each score.</p><a data-go="dashboard" role="link" tabindex="0">Dashboard →</a></div>
+    <div class="card"><h4>See what data exists, and what does not</h4><p>Every table we used, what its columns contain, how we cleaned it, and where the gaps are, including the oxygen-rich, low-pressure atmosphere planned for the Moon.</p><a data-go="data" role="link" tabindex="0">Data →</a></div>
+    <div class="card"><h4>Test a fire scenario</h4><p>Change gravity, oxygen, ventilation and material and watch the flame, oxygen and smoke respond. Every outcome is linked to the closest real NASA tests and flagged when it is an extrapolation.</p><a data-go="simulation" role="link" tabindex="0">Simulation →</a></div>
+  </div>
+  <h2 class="sec">Three findings to start with</h2>
+  <div class="grid g3">
+    <div class="card"><h4>In microgravity, ventilation is the fire's oxygen supply</h4><p>BASS-II flames on plastic rods and slabs went out when airflow dropped to roughly 0.2–0.6 cm/s, even at about 20 % oxygen. On Earth, buoyancy would keep feeding them.</p><div class="ev">Evidence: BASS-II (PSI-25), 13 low-flow extinction tests on rods and slabs</div></div>
+    <div class="card"><h4>Earth tests can mislead in both directions</h4><p>SAFFIRE-II silicone sheets burned in normal gravity but did not spread in microgravity. Other materials burn in microgravity at airflow speeds too low to matter on Earth.</p><div class="ev">Evidence: SAFFIRE-II (PSI-99), samples 2-1 to 2-4</div></div>
+    <div class="card"><h4>The Moon-base atmosphere is barely covered</h4><p>A base at 30 % oxygen or more is planned. In the PSI tables, solid-fuel tests stop at 22.2 % oxygen. Only 17 FLEX droplet tests (none of which self-extinguished) and the ACME gas flames reach those conditions, and nothing was measured in partial gravity.</p><div class="ev">Evidence: coverage chart on the dashboard</div></div>
+  </div>
+</section>
+
+<!-- ================= DASHBOARD ================= -->
+<section class="page" id="page-dashboard">
+  <h1>Investigation dashboard</h1>
+  <p class="lead">Summarise, rank and interpret NASA's microgravity combustion investigations for a specific fire-safety need.</p>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h3>1 · Where will the crew live?</h3><div class="seg" id="habseg"></div><div class="hint" id="habhint"></div></div>
+    <div class="card"><h3>2 · What do you need to know?</h3><div class="seg" id="conseg"></div><div class="hint" id="conhint"></div></div>
+  </div>
+  <div class="grid" style="grid-template-columns:minmax(320px,460px) 1fr;margin-top:16px" id="dashmain">
+    <div class="card"><h3>Ranked investigations</h3><div id="ranklist"></div><div class="hint">Score = relevance to the selected need (0–3 per fire-safety pillar) + match to the habitat's conditions (oxygen, pressure, gravity, scale, airflow) + how ready the table is for modelling. Weights are listed on the About page.</div></div>
+    <div class="card" id="detail"></div>
+  </div>
+  <h2 class="sec">Oxygen coverage: what was tested, and what a Moon base needs</h2>
+  <div class="card"><svg id="cov" viewBox="0 0 1000 330" width="100%"></svg>
+    <div class="legend"><span><i style="background:#ffb27a"></i>Solid fuels</span><span><i style="background:#5aa9ff"></i>Liquid droplets</span><span><i style="background:#b7a9ff"></i>Gas flames</span><span><i style="background:rgba(183,169,255,.25);border:1px dashed #b7a9ff"></i>Planned surface-habitat atmosphere (30 % O₂ or more, 10.2 psi or less, per the challenge statement)</span></div>
+    <p class="explain">Reading the chart: the solid materials a crew actually lives with (fabrics, plastics) were tested only up to 22.2 % oxygen in these tables. Above that, the repository offers droplets (FLEX, FLEX-2) and gas flames (ACME). Models of solid-material flammability in a Moon-base atmosphere therefore have to extrapolate, which is why the simulator labels those conditions as extrapolations.</p></div>
+  <h2 class="sec">Compare all investigations</h2>
+  <div class="card tw"><table id="cmp"></table><div class="hint">Click a column heading to sort. "Rows" counts rows in the PSI experimental table; "Data" is the total size of the investigation's files in PSI.</div></div>
+  <h2 class="sec">What the data says: interpreted findings</h2>
+  <div class="grid g2" id="insights"></div>
+</section>
+
+<!-- ================= DATA ================= -->
+<section class="page" id="page-data">
+  <h1>The data behind FLARE-SI</h1>
+  <p class="lead">Everything on this site comes from the experimental tables of NASA's Physical Sciences Informatics repository, combustion science area. This page says what we took, how, and what state it is in.</p>
+  <div class="grid g3" style="margin-top:14px">
+    <div class="card"><h3>Source</h3><p><a href="https://psi.nasa.gov" target="_blank" rel="noopener">NASA PSI repository</a>, managed by NASA Glenn Research Center. Each investigation has an accession number (for example PSI-25), a DOI, an experimental table (CSV) and folders of raw data, documents and publications.</p></div>
+    <div class="card"><h3>Licence</h3><p>All investigations used here are published under <b>Creative Commons Zero (CC0-1.0)</b>, as stated in each investigation's metadata. Tables were retrieved on 14 November 2026.</p></div>
+    <div class="card"><h3>What we used</h3><p>The experimental-table CSV of each investigation, plus its descriptive metadata (title, objective, hardware, publication count). We did not process the raw videos or sensor files, which total several terabytes.</p></div>
+  </div>
+  <h2 class="sec">Tables used</h2>
+  <div class="card tw"><table id="dtab"></table></div>
+  <h2 class="sec">How the tables were prepared</h2>
+  <div class="grid g2">
+    <div class="card"><h3>Solid-fuel outcomes (BASS-II, SAFFIRE)</h3><ul class="notes">
+      <li>The BASS-II table logs airflow as free text ("5 down to ext", "blowoff fan pot 6.0"). We kept only the 38 tests where the log states an unambiguous outcome and added 3 SAFFIRE tests, giving 41 curated outcomes.</li>
+      <li>Where only a fan setting was logged, flow was estimated as u ≈ 3.9 × (pot − 0.2) cm/s, calibrated on rows that list both (O5a, P5, O20).</li>
+      <li>The initial calibrated O₂ value is used for each test.</li>
+      <li>Each curated row keeps its test ID so it can be checked against the PSI table.</li></ul></div>
+    <div class="card"><h3>Droplet tests (FLEX)</h3><ul class="notes">
+      <li>All 274 rows are included as published: fuel, pressure, O₂ / CO₂ / He fractions, initial and extinction diameter, burning rate, burn time and test end.</li>
+      <li>Cells that were unreadable characters in the CSV are treated as missing. One pressure listed as 0 mmHg (test 114) is treated as missing.</li>
+      <li>No values were filled in or estimated.</li></ul></div>
+  </div>
+  <h2 class="sec">Data-quality findings (useful feedback for the repository)</h2>
+  <div class="card"><ul class="notes">
+    <li><b>BASS (PSI-26)</b>: the table is a test list with six columns and no test conditions or outcomes. Two dates are malformed ("5/15/2103", "6/29/`12").</li>
+    <li><b>BASS-II (PSI-25)</b>: no spread-rate, burn-time or outcome columns; outcomes exist only inside free-text flow logs. Five final-O₂ cells are implausible (0.6, 0.9, 1.6, 39.1, 40.4 %) and look like shifted columns. Tests T9 and T18 are dated 2018 among 2014 tests.</li>
+    <li><b>SAFFIRE-I (PSI-98)</b>: "Burn Time" is elapsed time, not a spread rate. <b>SAFFIRE-II (PSI-99)</b>: the μ symbol is lost in the headers ("?-g"), and thickness "037 mm" appears to be 0.37 mm. <b>SAFFIRE-III (PSI-100)</b>: configuration only, no results.</li>
+    <li><b>FLEX (PSI-69)</b>: about 30 diameter cells contain an unreadable character; the table does not say whether a cool flame followed the visible extinction.</li>
+    <li><b>SAME-R (PSI-101)</b>: the Rt/R0 column is not defined in the table. Values by material: <span id="samer"></span>.</li>
+    <li><b>ACME BRE (PSI-20)</b>: oxygen values such as "3400%" and "2100%" are formatting errors for 34 % and 21 %. <b>CFI-G (PSI-159)</b>: the "Cool flame?" column is filled for only 8 of 179 normal-flame rows.</li>
+    <li><b>Not in PSI at all</b>: partial-gravity combustion data (the challenge statement notes that LUCI and FM2 are expected to add it).</li></ul></div>
+  <h2 class="sec">Not used</h2>
+  <div class="card"><p>PSI-108 (STDCE-1) is a fluid-physics experiment on surface-tension flows and PSI-181 is a study of solder alloys. Both appeared in our first search and were excluded because they contain no combustion data.</p></div>
+</section>
+
+<!-- ================= SIMULATION ================= -->
+<section class="page" id="page-simulation">
+  <h1>Fire scenario simulator</h1>
+  <p class="lead">Two simulators, each tied to one NASA dataset. Outcomes come from the data; the pictures are simplified so they run in a browser.</p>
+  <div class="seg" id="tabseg" style="max-width:560px;margin:12px 0 16px"><button data-t="solid" class="on">Solid materials · airflow and oxygen</button><button data-t="drop">Liquid droplet · suppressant gases</button></div>
+
+  <div id="tab-solid" class="simwrap">
+    <div class="card">
+      <h3>Scenario</h3>
+      <select id="preset"><option value="">Load a preset…</option><option value="iss">ISS cabin: plastic, 21 % O₂, 8 cm/s</option><option value="fabric">SAFFIRE-II fabric: 22 % O₂, 20 cm/s</option><option value="limit">Near the oxygen limit: 15.5 % O₂, 20 cm/s</option><option value="silicone">Silicone: burns on Earth, not in orbit</option><option value="moon">Moon base: 34 % O₂, lunar gravity (extrapolation)</option><option value="earth">Earth reference: 21 % O₂, 1 g</option></select>
+      <label class="ctl">Gravity</label>
+      <select id="grav"><option value="micro">Microgravity (ISS)</option><option value="moon">Moon, 0.17 g (model estimate)</option><option value="mars">Mars, 0.38 g (model estimate)</option><option value="earth">Earth, 1 g (model estimate)</option></select>
+      <label class="ctl">Material</label>
+      <select id="mat"><option value="sibal">SIBAL fabric (cotton-fiberglass), thin</option><option value="film">PMMA film 100–400 µm, thin</option><option value="rod">PMMA rod / slab, thick</option><option value="silicone">Silicone sheet (SAFFIRE-II only)</option><option value="nomex">Nomex (SAFFIRE-II only)</option></select>
+      <label class="ctl">Oxygen <span class="val" id="o2v"></span></label><input type="range" id="o2" min="12" max="36" step="0.1" value="21">
+      <div class="hint">ISS ≈21 %. Tested range 13.6–22.2 %. Planned surface habitats: 30 % or more.</div>
+      <label class="ctl">Ventilation airflow <span class="val" id="uv"></span></label><input type="range" id="u" min="-1" max="2" step="0.01" value="0.9">
+      <div class="hint">Log scale, 0.1–100 cm/s.</div>
+      <button class="btn warn" id="ventoff">Response: shut off ventilation</button>
+      <button class="btn warn" id="inert">Response: dilute oxygen with nitrogen</button>
+      <button class="btn" id="reignite">Re-ignite sample</button>
+    </div>
+    <div class="card">
+      <h3>Field view</h3>
+      <div class="seg" id="vseg" style="margin-bottom:10px"><button data-v="T" class="on">Heat</button><button data-v="O">Oxygen</button><button data-v="M">Smoke</button></div>
+      <canvas id="cv" width="900" height="420"></canvas>
+      <div class="status"><span class="pill" id="state"></span><span class="pill" id="env"></span></div>
+      <div class="explain" id="explain"></div>
+      <div class="kpis">
+        <div class="kpi"><div class="k">Flame spread</div><div class="v" id="k1"></div><div class="t" id="k1t"></div></div>
+        <div class="kpi"><div class="k">Low-flow limit</div><div class="v" id="k2"></div><div class="t">below this the flame starves</div></div>
+        <div class="kpi"><div class="k">Blowoff limit</div><div class="v" id="k3"></div><div class="t">above this the flame is blown out</div></div>
+        <div class="kpi"><div class="k">Return-duct detector</div><div class="v" id="k4"></div><div class="t">in the ventilation path</div></div>
+        <div class="kpi"><div class="k">Ceiling detector</div><div class="v" id="k5"></div><div class="t">where smoke goes on Earth</div></div>
+        <div class="kpi"><div class="k">Fire status</div><div class="v" id="k6"></div><div class="t">simulation time</div></div>
+      </div>
+    </div>
+    <div class="card mapcol">
+      <h3>Flammability map · click to set conditions</h3>
+      <svg id="map" viewBox="0 0 440 340" width="100%"></svg>
+      <div class="legend"><span><i style="background:#3ddc97;border-radius:50%"></i>Burned (data)</span><span><i style="background:#5aa9ff"></i>Low-flow extinction</span><span><i style="background:#ffc24a"></i>Blowoff</span><span><i style="background:#ff5c6c"></i>No ignition</span></div>
+      <div class="hint" id="score"></div>
+    </div>
+    <div class="card full tw"><h3>Evidence · closest NASA tests to this scenario</h3>
+      <table><thead><tr><th>Test</th><th>Investigation</th><th>Material</th><th>O₂ %</th><th>Flow cm/s</th><th>Outcome</th><th>Log note</th></tr></thead><tbody id="ev"></tbody></table></div>
+    <div class="card full"><h3>How this simulator works</h3><ul class="notes">
+      <li><b>Outcome (data-fitted).</b> A flame survives between a low-flow limit, below which it cannot get oxygen, and a blowoff limit, above which the flow is too fast for the chemistry. Both limits are exponential fits in oxygen level to the BASS-II extinction and blowoff points, separately for thin and thick fuels. No flame is predicted below 14 % O₂.</li>
+      <li><b>Gravity (model estimate).</b> Gravity adds a buoyant flow to the ventilation: about 30 cm/s on Earth, scaled with g<sup>1/3</sup> for the Moon (≈16 cm/s) and Mars (≈22 cm/s). PSI holds no partial-gravity combustion data, so these modes are estimates bounded by the microgravity and Earth cases. The model has no pressure term.</li>
+      <li><b>Field view (illustrative).</b> Heat, oxygen deficit and smoke are carried by the airflow and by buoyancy and spread by diffusion on a 150 × 70 grid. This shows where heat and smoke go; it is not a CFD solution and the colours are relative, not temperatures.</li>
+      <li><b>Detectors.</b> An alarm triggers when simulated smoke reaches the ceiling strip or the return duct. Times are in simulation seconds and are for comparing scenarios, not for predicting real alarm times.</li>
+      <li><b>Spread rates.</b> Only the SAFFIRE-II values are measurements. Other values are scaled estimates and labelled as such.</li>
+      <li><b>Scope.</b> An education and research-support tool, not a certified spacecraft safety prediction system.</li></ul></div>
+  </div>
+
+  <div id="tab-drop" class="simwrap" style="display:none">
+    <div class="card">
+      <h3>Atmosphere and droplet</h3>
+      <label class="ctl">Fuel</label><select id="dfuel"><option value="H">Heptane (117 tests)</option><option value="M">Methanol (157 tests)</option></select>
+      <label class="ctl">Pressure</label><select id="dp"><option value="760">1 atm (760 mmHg, 14.7 psi)</option><option value="535">0.7 atm (535 mmHg, 10.3 psi)</option><option value="2100">≈3 atm (methanol + CO₂ tests only)</option></select>
+      <label class="ctl">Oxygen <span class="val" id="do2v"></span></label><input type="range" id="do2" min="12" max="34" step="1" value="21">
+      <label class="ctl">Suppressant gas</label><select id="ddil"><option value="co2">Carbon dioxide (CO₂)</option><option value="he">Helium (He)</option></select>
+      <label class="ctl">Suppressant added <span class="val" id="dxv"></span></label><input type="range" id="dx" min="0" max="50" step="1" value="0">
+      <label class="ctl">Droplet diameter <span class="val" id="dd0v"></span></label><input type="range" id="dd0" min="1.2" max="4.6" step="0.1" value="3">
+      <button class="btn" id="dmoon">Moon-base atmosphere: 34 % O₂ at 0.7 atm</button>
+      <div class="hint">The rest of the atmosphere is nitrogen.</div>
+    </div>
+    <div class="card">
+      <h3>Droplet flame</h3>
+      <canvas id="dcv" width="900" height="360"></canvas>
+      <div class="status"><span class="pill" id="dstate"></span><span class="pill" id="denv"></span></div>
+      <div class="explain" id="dexplain"></div>
+      <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+        <div class="kpi"><div class="k">Test end in nearest tests</div><div class="v" id="dk1"></div><div class="t">E extinction · D disruption · C completion</div></div>
+        <div class="kpi"><div class="k">Burn time</div><div class="v" id="dk2"></div><div class="t">weighted mean of nearest tests</div></div>
+        <div class="kpi"><div class="k">Burning rate</div><div class="v" id="dk3"></div><div class="t">FLEX table value; unit mm²/s assumed</div></div>
+        <div class="kpi"><div class="k">Fuel burned before flame-out</div><div class="v" id="dk4"></div><div class="t">1 − (extinction diameter / initial)³</div></div>
+      </div>
+    </div>
+    <div class="card mapcol">
+      <h3>FLEX suppression map</h3>
+      <svg id="fmap" viewBox="0 0 440 340" width="100%"></svg>
+      <div class="legend"><span><i style="background:#5aa9ff;border-radius:50%"></i>Extinction</span><span><i style="background:#ffc24a;border-radius:50%"></i>Disruption</span><span><i style="background:#3ddc97;border-radius:50%"></i>Completion</span></div>
+      <div class="hint" id="fscore"></div>
+    </div>
+    <div class="card full tw"><h3>Evidence · closest FLEX tests (PSI-69)</h3>
+      <table><thead><tr><th>Test</th><th>Fuel</th><th>Pressure</th><th>O₂ %</th><th>CO₂ %</th><th>He %</th><th>D₀ mm</th><th>D ext mm</th><th>Burn s</th><th>Test end</th></tr></thead><tbody id="dev"></tbody></table></div>
+    <div class="card full"><h3>How this simulator works</h3><ul class="notes">
+      <li><b>Prediction.</b> For the chosen conditions the simulator finds the 7 most similar FLEX tests with the same fuel (similarity in O₂, CO₂, He, pressure and droplet size) and reports their distance-weighted outcomes. Nothing is predicted from theory.</li>
+      <li><b>Animation.</b> The droplet shrinks following the classical d²-law, D² = D₀² − K·t, using the burning rate and burn time of the nearest tests. The flame drawing is schematic.</li>
+      <li><b>What "extinction" means.</b> The visible flame went out with fuel left. A large extinction diameter and a short burn time mean the atmosphere suppressed the flame; a small one means the droplet burned almost completely first.</li>
+      <li><b>Limits.</b> A single droplet is a model fire, not a burning material. Use it to compare suppressant gases and atmospheres, not to size an extinguisher.</li></ul></div>
+  </div>
+</section>
+
+<!-- ================= SAFETY ================= -->
+<section class="page" id="page-safety">
+  <h1>Fire safety in space: what the data supports</h1>
+  <p class="lead">NASA organises spacecraft fire safety around prevention, detection and suppression. Below, each measure is tied to the investigations that support it and to a simulator scenario you can run. Statements marked <span class="tag">general practice</span> come from published NASA material rather than from the tables used here.</p>
+
+  <div class="pillar"><h2 class="sec" style="margin-top:0">1 · Prevention</h2>
+    <div class="grid g2">
+      <div class="card"><h4>Choose materials with microgravity data, not Earth tests alone</h4><p>Materials are screened on Earth with an upward flame-spread test (NASA-STD-6001 Test 1). SAFFIRE-II shows the ranking can change in orbit: silicone burned in 1 g but did not spread in microgravity, Nomex did not ignite, and cotton-fiberglass fabric spread at 2.1–2.6 mm/s.</p><div class="ev">Evidence: SAFFIRE-II (PSI-99); BASS objective (PSI-26)</div><button class="cta ghost" data-preset="silicone">Run: silicone in orbit vs Earth</button></div>
+      <div class="card"><h4>Treat oxygen level as the main design lever</h4><p>BASS-II could not ignite a plastic rod at 13.6 % O₂ and found flames fragile near 15–16 %. Each extra percent of oxygen widens the range of airflow in which a fire survives. A 30–34 % habitat atmosphere sits far outside the tested range for solid materials.</p><div class="ev">Evidence: BASS-II (PSI-25) tests O4, O9, O12; ACME BRE (PSI-20) up to 40 % O₂</div><button class="cta ghost" data-preset="limit">Run: near the oxygen limit</button></div>
+      <div class="card"><h4>Do not rely on still air to keep materials safe at high oxygen</h4><p>At 21 % O₂ a flame in still microgravity air starves. The model's low-flow limit falls as oxygen rises, and on the Moon or Mars buoyancy supplies airflow by itself. Materials for surface habitats need to be qualified for both.</p><div class="ev">Evidence: BASS-II low-flow limits; extrapolation above 22.2 % O₂; partial gravity is a model estimate</div><button class="cta ghost" data-preset="moon">Run: Moon-base scenario</button></div>
+      <div class="card"><h4>Control ignition sources and stowage</h4><p>Electrical faults, overheated components and oxygen systems caused the historic incidents named in the challenge (Apollo 1, Mir). Keeping flammable items away from ignition sources and limiting how much burnable material is exposed remain the first line of defence.</p><div class="ev"><span class="tag">general practice</span></div></div>
+    </div></div>
+
+  <div class="pillar"><h2 class="sec" style="margin-top:0">2 · Detection</h2>
+    <div class="grid g2">
+      <div class="card"><h4>Put detectors where the air goes, not on the ceiling</h4><p>Without buoyancy, smoke does not rise. It follows the ventilation flow. In the simulator the return-duct detector alarms in microgravity while the ceiling detector stays silent; on Earth it is the reverse. On the Moon and Mars both paths matter.</p><div class="ev">Evidence: field view (illustrative); SAME and SAME-R smoke transport objectives (PSI-102, PSI-101)</div><button class="cta ghost" data-preset="iss">Run: ISS cabin, watch the detectors</button></div>
+      <div class="card"><h4>Detect first, then stop the airflow</h4><p>Shutting off ventilation starves a microgravity fire, but it also stops smoke reaching duct-mounted detectors. Run the ventilation shut-off in the simulator before and after the alarm to see the trade-off.</p><div class="ev">Evidence: BASS-II low-flow extinction; simulator detector logic (illustrative)</div><button class="cta ghost" data-preset="iss">Run: shut-off timing</button></div>
+      <div class="card"><h4>Design for the smoke that forms in microgravity</h4><p>SAME and SAME-R overheated Kapton, Teflon, silicone, lampwick and Pyrell on the ISS to measure the particles each releases. Detector sensitivity has to match those particle sizes, and discriminate smoke from dust (DAFT), which will matter with lunar regolith.</p><div class="ev">Evidence: SAME-R (PSI-101, 109 tests), SAME (PSI-102), DAFT (PSI-47)</div></div>
+      <div class="card"><h4>A flame that looks out may not be out</h4><p>FLEX and the Cool Flames Investigation found droplets that keep reacting at low temperature after the visible flame disappears. Fire-out criteria should not rely on visible flame alone.</p><div class="ev">Evidence: CFI (PSI-39), FLEX publications, CFI-G (PSI-159)</div></div>
+    </div></div>
+
+  <div class="pillar"><h2 class="sec" style="margin-top:0">3 · Suppression and response</h2>
+    <div class="grid g2">
+      <div class="card"><h4>Ventilation shut-off works in orbit, at today's oxygen level</h4><p>It is the one suppression action directly supported by solid-fuel data: 15 curated BASS-II flames went out as flow fell to about 1 cm/s or less. The same action is not expected to work in partial gravity, where buoyancy keeps supplying air.</p><div class="ev">Evidence: BASS-II (PSI-25); partial gravity is a model estimate</div><button class="cta ghost" data-preset="iss">Run: ISS shut-off</button></div>
+      <div class="card"><h4>Diluting the atmosphere suppresses flames; the gas matters</h4><p>FLEX measured droplet flames in atmospheres diluted with CO₂ and helium. In the droplet simulator, raise the suppressant fraction until the flame goes out quickly, then compare the two gases and the two pressures.</p><div class="ev">Evidence: FLEX (PSI-69), 274 tests</div><a class="cta ghost" data-go="simulation" role="link" tabindex="0" data-tab="drop">Open the droplet simulator</a></div>
+      <div class="card"><h4>Lowering oxygen below about 14 % ends flaming of the tested plastic</h4><p>The simulator's nitrogen-dilution response uses the BASS-II no-ignition result. In a crewed cabin this is constrained by what the crew can breathe, so it applies to isolated modules or uncrewed volumes.</p><div class="ev">Evidence: BASS-II test O12; <span class="tag">general practice</span> for crew limits</div><button class="cta ghost" data-preset="iss">Run: nitrogen dilution</button></div>
+      <div class="card"><h4>Portable extinguishers and crew procedure</h4><p>Station crews are trained to protect breathing, remove power, stop airflow and use a portable extinguisher. The challenge statement notes the fine-water-mist extinguisher developed for the ISS. Extinguisher performance is not in the tables used here.</p><div class="ev"><span class="tag">general practice</span></div></div>
+    </div></div>
+
+  <h2 class="sec">What this work adds for NASA</h2>
+  <div class="grid g3">
+    <div class="card"><h4>One view across separate investigations</h4><p>PSI stores each investigation separately. FLARE-SI puts 20 of them on common axes (fuel, oxygen, pressure, airflow, measurements, fire-safety pillar) and ranks them for a stated need, which is the task set by the challenge.</p></div>
+    <div class="card"><h4>A coverage and gap map for exploration atmospheres</h4><p>The dashboard shows where data stops: no solid-fuel table above 22.2 % O₂, only 17 droplet tests at Moon-base-like atmospheres, and no partial-gravity data. This supports the case for experiments such as LUCI and FM2 and shows which existing data can bound them.</p></div>
+    <div class="card"><h4>Model-ready extracts with provenance</h4><p>41 curated solid-fuel outcomes and all 274 FLEX tests are provided as structured data with test IDs. The simulator shows they are enough to build and check simple predictive models, and labels every extrapolation.</p></div>
+    <div class="card"><h4>Concrete repository feedback</h4><p>The Data page lists specific problems found in the tables: missing condition columns, undefined variables, shifted cells, encoding errors. Fixing them would make the repository easier to use for everyone.</p></div>
+    <div class="card"><h4>A training and outreach tool</h4><p>The simulator makes counter-intuitive results visible in seconds: a flame that dies when the fan stops, a detector on the ceiling that never alarms. It is suited to students, new engineers and crew familiarisation.</p></div>
+    <div class="card"><h4>Relevance on Earth</h4><p>The same data supports terrestrial fire science: smoke-versus-dust discrimination for detectors, low-oxygen fire prevention in enclosed spaces, and suppressant-gas comparisons.</p></div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="page" id="page-about">
+  <h1>About, methods and disclosures</h1>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h3>Use of artificial intelligence</h3><ul class="notes">
+      <li>AI assistant used: <b>Claude (Anthropic)</b>.</li>
+      <li><b>Code:</b> the website, both simulators and the ranking logic were written with AI assistance and reviewed by the team.</li>
+      <li><b>Data:</b> retrieval of the PSI tables, the curation of the 41 solid-fuel outcomes from BASS-II free-text logs, and the data-quality review were AI-assisted. Every curated row carries its PSI test ID for checking.</li>
+      <li><b>Text:</b> investigation summaries, interpretations and the project report were drafted with AI assistance from the PSI tables and metadata.</li>
+      <li>No AI-generated images, video or audio are used. No NASA logos or mission insignia are used.</li>
+      <li>The dashboard's interpretations are pre-generated and fixed; the site does not call an AI model while you use it. Rankings come from the transparent scoring rule below.</li></ul></div>
+    <div class="card"><h3>Ranking rule</h3><p>Each investigation has a 0–3 relevance to prevention, detection and suppression, and 0–3 feature levels: elevated oxygen, reduced pressure, solid fuels, large scale, airflow varied, partial-gravity relevance, and per-test quantitative outcomes in the table.</p>
+      <p class="mono" style="font-size:12px;color:var(--soft)">score = 12 × pillar relevance (or 5 × each pillar for "All") + Σ habitat weight × feature + (6 or 2) × quantitative + 2 × log₁₀(rows + 1)</p>
+      <div id="weights" class="hint"></div><p class="hint">Relevance and feature levels were assigned by the team from each table and its metadata. They are judgements, shown openly on each investigation's detail card.</p></div>
+    <div class="card"><h3>Limitations</h3><ul class="notes">
+      <li>Only experimental tables were analysed, not raw video or sensor data.</li>
+      <li>The solid-fuel limits are fitted to 41 outcomes and checked against the same tests; there is no independent validation set yet.</li>
+      <li>Partial-gravity and Earth modes are model estimates. The solid-fuel model has no pressure dependence.</li>
+      <li>The field view is illustrative, not a CFD solution.</li>
+      <li>This is not a certified safety tool and must not be used for flight decisions.</li></ul></div>
+    <div class="card"><h3>Sources and licences</h3><ul class="notes">
+      <li>NASA Physical Sciences Informatics repository, combustion science investigations listed on the Data page (CC0-1.0).</li>
+      <li>2026 NASA Space Apps Challenge statement "Flame in Freefall" (habitat atmosphere, partial-gravity notes, fire-safety pillars).</li>
+      <li>NASA-STD-6001 (flammability test methods), referenced by the BASS objectives.</li>
+      <li>Fonts: Inter and JetBrains Mono (SIL Open Font License) via Google Fonts.</li>
+      <li>This project's own code and text: Apache License 2.0.</li></ul></div>
+  </div>
+</section>
+</main>
+<footer>FLARE-SI is a 2026 NASA Space Apps Challenge project. It is not affiliated with or endorsed by NASA. Data: NASA PSI, CC0-1.0. Educational and research-support tool only.</footer>
+<script>
+// FLARE-SI data layer. All values transcribed from NASA PSI experimental tables (CC0-1.0),
+// retrieved 2026-11-14 from https://psi.nasa.gov. Data curation was AI-assisted (see About page).
+const PSI = id => 'https://psi.nasa.gov/physci/repo/data/investigations/' + id;
+
+// pil = relevance to [prevention, detection, suppression] 0-3
+// f   = features 0-3: hi (elevated O2), lowp (reduced pressure), solid (solid fuels), scale (large scale),
+//       flow (ventilation varied), pg (partial-gravity relevance), quant (per-test quantitative outcomes in table)
+const INV = [
+ {id:'PSI-25',acr:'BASS-II',title:'Burning and Suppression of Solids – II',phase:'Solid',hw:'Microgravity Science Glovebox (MSG), ISS',yrs:'2014–2016',rows:129,rowType:'per-test',o2:[13.6,22.2],
+  cond:'1 atm cabin; fan-driven flow ≈0–38 cm/s; 3 flow-restrictor settings',fuels:'PMMA films 100–400 µm, slabs 1–5 mm, rods 1/4–1/2 in; SIBAL fabric; Nomex; wax candle',
+  vars:'Fuel shape and thickness, O₂ level, flow speed (stepped during a test), 6 PI teams',meas:'Calibrated O₂ / CO₂ / CO before and after, radiometer, video frames, fan and airflow log',
+  pil:[3,1,2],f:{hi:0,lowp:0,solid:3,scale:1,flow:3,pg:0,quant:2},pubs:17,gb:274.6,doi:'10.60555/4qc4-de67',
+  sum:'Small solid samples burned in a flow duct while crews stepped the airflow up or down until the flame went out.',
+  ins:'Maps both edges of flammability in microgravity: flames starve at roughly 0.2–0.6 cm/s and blow off at 15–38 cm/s near 15–16 % O₂; one rod could not be ignited at 13.6 % O₂. This is the basis of the solid-fuel simulator.'},
+ {id:'PSI-26',acr:'BASS',title:'Burning and Suppression of Solids',phase:'Solid',hw:'Microgravity Science Glovebox (MSG), ISS',yrs:'2012–2013',rows:121,rowType:'test manifest',o2:null,
+  cond:'Not listed in the table (conditions are in raw data and publications)',fuels:'PMMA spheres and slabs, SIBAL, Nomex, Ultem, paraffin and Japan-wax candles',
+  vars:'Material, geometry, concurrent vs opposed flow, wake ignition',meas:'Table is a test list only; video and radiometer data are in the raw-data folders',
+  pil:[3,0,2],f:{hi:0,lowp:0,solid:3,scale:1,flow:2,pg:0,quant:0},pubs:10,gb:163.6,doi:'10.60555/58h4-dy80',
+  sum:'First ISS campaign with the BASS hardware, covering many materials and shapes.',
+  ins:'Designed to bridge NASA\'s normal-gravity flammability screening test (NASA-STD-6001 Test 1) and real microgravity behaviour. Its table needs the companion publications to become model-ready.'},
+ {id:'PSI-99',acr:'SAFFIRE-II',title:'Spacecraft Fire Experiment – II',phase:'Solid',hw:'Uncrewed Cygnus cargo vehicle',yrs:'2016',rows:9,rowType:'per-sample',o2:[21.5,22.1],
+  cond:'Cabin pressure; 20 cm/s flow; concurrent and opposed',fuels:'Silicone 0.27–1.03 mm, SIBAL cotton-fiberglass, PMMA, Nomex (5 × 29 cm samples)',
+  vars:'Material, thickness, flow direction',meas:'Burn length and spread rate in microgravity and in 1 g for the same samples',
+  pil:[3,0,0],f:{hi:0,lowp:0,solid:3,scale:2,flow:1,pg:0,quant:3},pubs:7,gb:16.9,doi:'10.60555/2chp-m469',
+  sum:'Nine material samples burned one after another inside a departing cargo ship.',
+  ins:'The only table with measured spread rates in both gravity levels: SIBAL spread at 2.1–2.6 mm/s; silicone burned on Earth (0.6–1.2 mm/s) but did not spread in microgravity; Nomex did not ignite.'},
+ {id:'PSI-98',acr:'SAFFIRE-I',title:'Spacecraft Fire Safety Experiment – I',phase:'Solid',hw:'Uncrewed Cygnus cargo vehicle',yrs:'2016',rows:2,rowType:'per-sample',o2:[21.5,21.7],
+  cond:'Cabin pressure; 20 cm/s flow; concurrent and opposed',fuels:'One SIBAL fabric sheet, 40.6 × 94 cm',
+  vars:'Flow direction',meas:'Burn time, two cameras, flow visualisation',
+  pil:[3,1,0],f:{hi:0,lowp:0,solid:3,scale:3,flow:1,pg:0,quant:1},pubs:6,gb:12.3,doi:'10.60555/0t15-1z43',
+  sum:'The largest fire deliberately lit inside a spacecraft: a fabric sheet about a metre wide.',
+  ins:'Shows how a realistic-size fire grows in a ventilated cabin. The table gives elapsed burn times (420 s concurrent, 70 s opposed), not spread rates.'},
+ {id:'PSI-100',acr:'SAFFIRE-III',title:'Spacecraft Fire Experiment – III',phase:'Solid',hw:'Uncrewed Cygnus cargo vehicle',yrs:'2017',rows:2,rowType:'configuration only',o2:null,
+  cond:'30 cm/s flow; concurrent and opposed',fuels:'SIBAL fabric sheet, 40.6 × 94 cm',
+  vars:'Flow direction',meas:'Camera files; no outcome columns in the table',
+  pil:[3,1,0],f:{hi:0,lowp:0,solid:3,scale:3,flow:1,pg:0,quant:0},pubs:3,gb:35.2,doi:'10.60555/040q-4h36',
+  sum:'Repeat of SAFFIRE-I at a higher airflow.',
+  ins:'Extends the large-scale case to 30 cm/s. Outcomes must be extracted from the video data, so it ranks high for relevance but low for ready-to-use numbers.'},
+ {id:'PSI-69',acr:'FLEX',title:'Flame Extinguishment Experiment',phase:'Droplet',hw:'Combustion Integrated Rack (CIR) + MDCA, ISS',yrs:'2009 onward',rows:274,rowType:'per-test',o2:[12,34],
+  cond:'0.7–3 atm; CO₂ 0–70 %, He 0–45 % dilution',fuels:'Methanol (157 tests) and heptane (117 tests) droplets, 1.1–4.7 mm',
+  vars:'O₂ fraction, pressure, suppressant gas and amount, droplet size',meas:'Burning rate, flame-extinction diameter, burn time, test end (extinction / disruption / completion)',
+  pil:[1,0,3],f:{hi:2,lowp:3,solid:0,scale:0,flow:0,pg:0,quant:3},pubs:51,gb:923.8,doi:'10.60555/mbq8-0451',
+  sum:'Single fuel droplets burned in atmospheres diluted with fire-suppressant gases.',
+  ins:'The suppression dataset: 186 of 274 droplets extinguished before the fuel was gone. It also holds 17 tests at 30–34 % O₂ and about 10.4 psi, the only per-test rows at Moon-base-like atmospheres. This is the basis of the droplet suppression simulator.'},
+ {id:'PSI-68',acr:'FLEX-2',title:'Flame Extinguishment Experiment – 2',phase:'Droplet',hw:'CIR + MDCA, ISS',yrs:'2016–2019 (repository dates)',rows:8,rowType:'test matrix',o2:[17,30],
+  cond:'0.5–3 atm; O₂/N₂ or O₂/He; slow flow 0.1–5 cm/s',fuels:'Iso-octane, n-octane, heptane, decane, ethanol and mixtures, 1.5–5 mm',
+  vars:'Fuel, O₂ fraction, pressure, diluent, flow',meas:'Table is the planned matrix; per-test results are in 48 publications',
+  pil:[1,0,2],f:{hi:2,lowp:2,solid:0,scale:0,flow:1,pg:0,quant:0},pubs:48,gb:1224.8,doi:'10.60555/byp8-h018',
+  sum:'Extends FLEX to practical fuels, fuel mixtures and slow convective flow.',
+  ins:'Adds slow-flow effects to droplet burning, relevant to liquid spills in ventilated cabins. Needs publication mining before it can feed models.'},
+ {id:'PSI-39',acr:'CFI',title:'Cool Flames Investigation',phase:'Droplet',hw:'CIR + MDCA, ISS',yrs:'2020–2021',rows:87,rowType:'per-test conditions',o2:[17,21],
+  cond:'0.5–5 atm; He dilution 0–59 %',fuels:'n-Dodecane and n-dodecane / iso-dodecane blends',
+  vars:'Pressure, helium fraction, fuel blend',meas:'Test conditions per run; outcomes in raw data',
+  pil:[1,1,2],f:{hi:0,lowp:2,solid:0,scale:0,flow:0,pg:0,quant:1},pubs:7,gb:718.9,doi:'10.60555/m6pj-a914',
+  sum:'Studies "cool flames": low-temperature burning that continues after the visible flame is gone.',
+  ins:'A visibly extinguished fire may still be reacting. That matters for declaring a fire "out" and for detectors that rely on visible flame or heat.'},
+ {id:'PSI-101',acr:'SAME-R',title:'Smoke Aerosol Measurement Experiment – Reflight',phase:'Aerosol',hw:'MSG smoke-diagnostics hardware, ISS',yrs:'2010',rows:109,rowType:'per-test',o2:null,
+  cond:'Cabin air; inlet velocity 0–8.1 cm/s',fuels:'Kapton (29), silicone (22), lampwick (20), Pyrell (20), Teflon (18), overheated not flaming',
+  vars:'Material, heating level, airflow, smoke ageing time',meas:'Rt/R0, duration, ageing and mixing times',
+  pil:[0,3,0],f:{hi:0,lowp:0,solid:2,scale:0,flow:2,pg:0,quant:2},pubs:6,gb:6.3,doi:'10.60555/2np7-jv14',
+  sum:'Overheated typical spacecraft materials and measured the smoke particles they release in microgravity.',
+  ins:'Detectors must be designed for the smoke particles that actually form in microgravity. The table\'s Rt/R0 column is not defined in the table itself, so we display it without interpreting it.'},
+ {id:'PSI-102',acr:'SAME',title:'Smoke and Aerosol Measurement Experiment',phase:'Aerosol',hw:'MSG smoke-diagnostics hardware, ISS',yrs:'2007',rows:8,rowType:'test matrix',o2:null,
+  cond:'Cabin air; airflow 5–10 cm/s',fuels:'Teflon, Kapton, silicone rubber, lampwick, dibutyl phthalate',
+  vars:'Material, airflow, ageing duration',meas:'Weight-loss rate, ageing duration',
+  pil:[0,3,0],f:{hi:0,lowp:0,solid:2,scale:0,flow:1,pg:0,quant:1},pubs:16,gb:0.7,doi:'10.60555/gd4k-8h62',
+  sum:'First ISS measurement of smoke particle sizes from overheated materials.',
+  ins:'Foundation for spacecraft smoke-detector requirements; most of its value is in the 16 linked publications.'},
+ {id:'PSI-47',acr:'DAFT / DAFT-2',title:'Dust and Aerosol Measurement Feasibility Test',phase:'Aerosol',hw:'TSI P-Trak particle counter, ISS',yrs:'2005',rows:2,rowType:'session list',o2:null,
+  cond:'Cabin air',fuels:'Arizona road dust test aerosol (no combustion)',
+  vars:'Instrument, sampling location',meas:'Particle counts',
+  pil:[0,2,0],f:{hi:0,lowp:0,solid:0,scale:0,flow:0,pg:0,quant:0},pubs:2,gb:0,doi:'10.60555/ztgj-d202',
+  sum:'Checked that a commercial particle counter works in microgravity before SAME relied on it.',
+  ins:'Dust is the main cause of false alarms. Dust-versus-smoke discrimination becomes critical on the Moon, where regolith dust will enter the habitat.'},
+ {id:'PSI-20',acr:'ACME BRE',title:'Burning Rate Emulator',phase:'Gas',hw:'CIR + ACME insert, ISS',yrs:'2019 onward',rows:18,rowType:'per test day',o2:[21,40],
+  cond:'Still atmosphere; pressure varied (not listed in table); 25 and 50 mm burners',fuels:'Ethylene and diluted ethylene through a porous burner that emulates a burning solid or liquid',
+  vars:'O₂ level, burner size, fuel dilution',meas:'Number of flames ignited per day; details in raw data',
+  pil:[3,0,0],f:{hi:3,lowp:1,solid:2,scale:0,flow:0,pg:0,quant:1},pubs:16,gb:2035.6,doi:'10.60555/vb93-3y72',
+  sum:'A gas burner that mimics a burning material, tested in still air up to 40 % O₂.',
+  ins:'Addresses the key question for oxygen-enriched habitats: which materials keep burning with no airflow at all. Shutting ventilation off works at 21 % O₂ but may not at 34 %.'},
+ {id:'PSI-159',acr:'ACME CFI-G',title:'Cool Flames Investigation with Gases',phase:'Gas',hw:'CIR + ACME insert, ISS',yrs:'—',rows:333,rowType:'per-test',o2:[12,85],
+  cond:'0.4–3.3 bar; spherical burner; normal and inverse flames',fuels:'Ethane, propane, butane (pure and diluted)',
+  vars:'O₂ fraction, pressure, fuel, flow rate, flame type',meas:'Adiabatic flame temperature, burn time, self-extinction, peak burner temperature',
+  pil:[2,0,1],f:{hi:3,lowp:2,solid:0,scale:0,flow:0,pg:0,quant:3},pubs:2,gb:2085.6,doi:'10.60555/cyt1-kh64',
+  sum:'Spherical gas flames, including "inside-out" flames fed with up to 85 % oxygen.',
+  ins:'Highest oxygen concentrations in the repository. Useful for anchoring chemistry models at exploration-atmosphere O₂ levels. Only 8 of 179 normal-flame rows carry a cool-flame label.'},
+ {id:'PSI-10',acr:'ACME Flame Design',title:'Flame Design',phase:'Gas',hw:'CIR + ACME insert, ISS',yrs:'—',rows:327,rowType:'per-test',o2:[20,85],
+  cond:'≈1 atm; spherical burner; normal and inverse flames',fuels:'Ethylene (and propane)',
+  vars:'O₂ fraction, flow rates, inert dilution',meas:'Mass flows, stoichiometric mixture fraction, adiabatic flame temperature',
+  pil:[1,1,1],f:{hi:3,lowp:0,solid:0,scale:0,flow:0,pg:0,quant:3},pubs:33,gb:2180.4,doi:'10.60555/w4zy-bt45',
+  sum:'Finds the conditions where spherical flames start to make soot and where they go out.',
+  ins:'Soot limits tell us when a fire makes detectable smoke; extinction limits of these radiating flames support suppression models.'},
+ {id:'PSI-107',acr:'SPICE',title:'Smoke Point In Co-flow Experiment',phase:'Gas',hw:'MSG flow duct, ISS',yrs:'—',rows:469,rowType:'per-test',o2:null,
+  cond:'Cabin air co-flow up to 85 cm/s; nozzles 0.41–1.6 mm',fuels:'Propylene and mixtures (368), propane (50), ethylene (47), methane (4)',
+  vars:'Fuel, fuel flow rate, air co-flow speed, nozzle size',meas:'Fuel and air rates at the smoke point',
+  pil:[1,2,0],f:{hi:0,lowp:0,solid:0,scale:0,flow:3,pg:0,quant:3},pubs:9,gb:6.9,doi:'10.60555/9kbh-e962',
+  sum:'Measures when a gas-jet flame starts to release smoke, as a function of airflow.',
+  ins:'Largest table in the set. Shows how ventilation speed changes smoke release, which feeds both detection and radiant-heat models. Propylene dominates by experimental design, not because it is a typical cabin fuel.'},
+ {id:'PSI-106',acr:'SLICE',title:'Structure and Liftoff In Combustion Experiment',phase:'Gas',hw:'MSG flow duct, ISS',yrs:'2012',rows:12,rowType:'per test day',o2:null,
+  cond:'Cabin air co-flow',fuels:'Methane, ethylene, ethane (pure and N₂-diluted)',
+  vars:'Fuel and dilution',meas:'Test log; flame structure in raw data',
+  pil:[1,0,0],f:{hi:0,lowp:0,solid:0,scale:0,flow:1,pg:0,quant:0},pubs:5,gb:72.9,doi:'10.60555/pm12-rg61',
+  sum:'Looks at how jet flames lift off the burner and blow out.',
+  ins:'Blow-out physics supports the blowoff side of flammability models. Indirect fire-safety relevance.'},
+ {id:'PSI-22',acr:'ACME E-FIELD Flames',title:'Electric-Field Effects on Laminar Diffusion Flames',phase:'Gas',hw:'CIR + ACME insert, ISS',yrs:'2018',rows:32,rowType:'per test day',o2:null,
+  cond:'≈1 atm; high-voltage mesh above burner',fuels:'Methane (pure and diluted)',
+  vars:'Voltage polarity, fuel concentration',meas:'Flames ignited per day; ion current in raw data',
+  pil:[1,0,1],f:{hi:0,lowp:0,solid:0,scale:0,flow:0,pg:3,quant:0},pubs:25,gb:950.2,doi:'10.60555/se5a-8c73',
+  sum:'Uses an electric field to push on the ions in a flame.',
+  ins:'Per the challenge statement, the field acts like an adjustable body force and so mimics partial gravity. It is the closest thing to Moon/Mars-gravity data currently in the repository.'},
+ {id:'PSI-21',acr:'ACME CLD Flame',title:'Coflow Laminar Diffusion Flame',phase:'Gas',hw:'CIR + ACME insert, ISS',yrs:'2017',rows:32,rowType:'per test day',o2:null,
+  cond:'≈1 atm co-flow',fuels:'Methane and ethylene, strongly diluted to pure',
+  vars:'Fuel concentration, flow rates',meas:'Flames ignited per day',
+  pil:[1,0,0],f:{hi:0,lowp:0,solid:0,scale:0,flow:1,pg:0,quant:0},pubs:18,gb:2005.5,doi:'10.60555/23e1-9950',
+  sum:'Benchmark flames at the extremes of fuel dilution for testing computer models.',
+  ins:'Model-validation data for weak (near-extinction) and sooty flames. Indirect fire-safety relevance.'},
+ {id:'PSI-23',acr:'ACME s-Flame',title:'Structure and Response of Spherical Diffusion Flames',phase:'Gas',hw:'CIR + ACME insert, ISS',yrs:'2019',rows:18,rowType:'per test day',o2:null,
+  cond:'≈21 % O₂, ≈1 atm (O₂ falls as products build up)',fuels:'Ethylene diluted with N₂',
+  vars:'Dilution, atmosphere',meas:'Flames ignited per day',
+  pil:[1,0,1],f:{hi:0,lowp:0,solid:0,scale:0,flow:0,pg:0,quant:0},pubs:44,gb:782.2,doi:'10.60555/k57n-p030',
+  sum:'Spherical flames used to test transport and chemistry models, including extinction.',
+  ins:'Shows flames in a sealed volume weakening as oxygen is consumed and products accumulate, the same process that limits a fire in a closed module.'},
+ {id:'PSI-62',acr:'BASS-FGM (model)',title:'Concurrent Flame Spread Modeling with Flamelet Generated Manifolds',phase:'Model',hw:'Numerical study compared with BASS',yrs:'2019–2021',rows:0,rowType:'no table',o2:null,
+  cond:'—',fuels:'PMMA (simulated)',vars:'—',meas:'Model output compared with BASS tomography',
+  pil:[2,0,0],f:{hi:0,lowp:0,solid:3,scale:0,flow:1,pg:0,quant:0},pubs:4,gb:0,doi:'10.60555/e9xp-ex83',
+  sum:'A computational model of concurrent flame spread, validated against BASS.',
+  ins:'Shows how the BASS data are already used to validate predictive models.'}
+];
+
+// Curated solid-fuel outcomes. [id, source, PI, material, geom (t=thin,k=thick), O2 %, flow cm/s, outcome, log note]
+// outcome: S burned, Q low-flow extinction, B blowoff, N no ignition
+const SOLID = [
+ ['B14','BASS-II · PSI-25','Bhattacharjee','PMMA film 200 µm, 1 cm','t',15.0,1.0,'Q','Flow stepped 5 → 3 → 2 cm/s, then extinguished'],
+ ['B21','BASS-II · PSI-25','Bhattacharjee','PMMA film 200 µm, 1 cm','t',20.8,0.5,'Q','Flow reduced from 5 cm/s to extinction (final flow ≈0.5 assumed)'],
+ ['B18','BASS-II · PSI-25','Bhattacharjee','PMMA film 200 µm, 1 cm','t',17.4,26.5,'B','Flow increased until blowoff (fan pot 7.0)'],
+ ['B19','BASS-II · PSI-25','Bhattacharjee','PMMA film 100 µm, 2 cm','t',17.3,22.6,'B','Flow increased until blowoff (fan pot 6.0)'],
+ ['B16','BASS-II · PSI-25','Bhattacharjee','PMMA film 100 µm, 2 cm','t',17.3,3,'S','Burned at 3 cm/s'],
+ ['B17','BASS-II · PSI-25','Bhattacharjee','PMMA film 200 µm, 1 cm','t',17.5,3,'S','Burned at 5 and 3 cm/s'],
+ ['B1','BASS-II · PSI-25','Bhattacharjee','PMMA film 100 µm, 2 cm','t',22.2,5,'S','Burned at 5 cm/s'],
+ ['T1','BASS-II · PSI-25',"T'ien",'SIBAL fabric, 2 cm','t',18.5,10,'S','Burned at 10 cm/s'],
+ ['T2','BASS-II · PSI-25',"T'ien",'SIBAL fabric, 2 cm','t',18.5,4,'S','Burned at 9, 5 and 4 cm/s'],
+ ['T5','BASS-II · PSI-25',"T'ien",'SIBAL fabric, 2 cm','t',18.8,1,'S','Burned at 10, 2 and 1 cm/s'],
+ ['T9','BASS-II · PSI-25',"T'ien",'SIBAL fabric, 2 cm','t',16.4,10,'S','Burned at 10 cm/s'],
+ ['T10','BASS-II · PSI-25',"T'ien",'SIBAL fabric, 2 cm','t',16.4,5,'S','Burned at 5 cm/s'],
+ ['T13','BASS-II · PSI-25',"T'ien",'SIBAL fabric, 2 cm','t',17.5,1,'S','Burned at 5 and 1 cm/s'],
+ ['T25','BASS-II · PSI-25',"T'ien",'SIBAL fabric, 2 cm','t',20.8,2.5,'S','Burned at 5 and 2.5 cm/s'],
+ ['2-5','SAFFIRE-II · PSI-99','SAFFIRE team','SIBAL fabric, 5 cm','t',22.1,20,'S','Microgravity concurrent spread 2.1 mm/s'],
+ ['2-6','SAFFIRE-II · PSI-99','SAFFIRE team','SIBAL fabric, 5 cm','t',22.1,20,'S','Microgravity concurrent spread 2.6 mm/s'],
+ ['S1','SAFFIRE-I · PSI-98','SAFFIRE team','SIBAL fabric, 94 cm','t',21.6,20,'S','Large-scale concurrent burn, 420 s'],
+ ['O4','BASS-II · PSI-25','Olson','PMMA rod 3/8 in clear','k',14.8,0.6,'Q','Flow reduced to extinction; O₂ fell to 13.6 % during test'],
+ ['O6','BASS-II · PSI-25','Olson','PMMA rod 1/4 in clear','k',16.7,0.3,'Q','Out at fan pot 0.275 (near-still air)'],
+ ['O8a','BASS-II · PSI-25','Olson','PMMA rod 1/4 in clear','k',15.7,0.4,'Q','Extinguished at fan pot 0.31'],
+ ['O14','BASS-II · PSI-25','Olson','PMMA rod 1/4 in black','k',16.3,0.5,'Q','Flow reduced from 5 cm/s to extinction'],
+ ['O19','BASS-II · PSI-25','Olson','PMMA rod 1/4 in clear','k',15.3,0.5,'Q','Flow reduced from 5 cm/s to extinction'],
+ ['P1','BASS-II · PSI-25','Fernandez-Pello','PMMA rod 1/4 in black','k',17.7,0.5,'Q','Slow flow decrease to extinction'],
+ ['P5','BASS-II · PSI-25','Fernandez-Pello','PMMA rod 1/2 in black','k',19.3,0.3,'Q','Flow reduced from 5 cm/s to extinction'],
+ ['P9','BASS-II · PSI-25','Fernandez-Pello','PMMA rod 1/2 in black','k',17.6,0.3,'Q','Flow reduced to extinction'],
+ ['P10','BASS-II · PSI-25','Fernandez-Pello','PMMA rod 1/4 in black','k',17.0,0.4,'Q','Extinguished at fan pot 0.30'],
+ ['P13a','BASS-II · PSI-25','Fernandez-Pello','PMMA rod 1/2 in black','k',20.7,0.2,'Q','Flow reduced to zero, extinguished'],
+ ['P22b','BASS-II · PSI-25','Fernandez-Pello','PMMA rod 3/8 in black','k',20.0,0.4,'Q','Extinguished at fan pot 0.31'],
+ ['P25','BASS-II · PSI-25','Fernandez-Pello','PMMA rod 3/8 in clear','k',20.9,0.4,'Q','Extinguished at fan pot 0.31'],
+ ['M17','BASS-II · PSI-25','Miller','PMMA slab 2 mm, 2 cm','k',18.8,0.4,'Q','Flow 10 → 5 → 3 → 0, extinguished'],
+ ['O7','BASS-II · PSI-25','Olson','PMMA rod 1/4 in clear','k',16.0,38,'B','Blowoff at maximum fan'],
+ ['O8b','BASS-II · PSI-25','Olson','PMMA rod 1/4 in clear','k',15.5,22.6,'B','Blowoff at fan pot 6.0'],
+ ['O9','BASS-II · PSI-25','Olson','PMMA rod 1/4 in clear','k',15.0,14.8,'B','Blowoff at fan pot 4.0'],
+ ['O11','BASS-II · PSI-25','Olson','PMMA rod 1/4 in black','k',15.4,22.6,'B','Blowoff at fan pot 6.0'],
+ ['O22','BASS-II · PSI-25','Olson','PMMA rod 1/2 in clear','k',15.4,26.5,'B','Flow raised to 26.5 cm/s, blowoff'],
+ ['O12','BASS-II · PSI-25','Olson','PMMA rod 3/8 in clear','k',13.6,5,'N','No ignition at any flow tested'],
+ ['O20','BASS-II · PSI-25','Olson','PMMA rod 1/4 in clear','k',16.5,38.5,'S','Sustained up to maximum flow 38.5 cm/s'],
+ ['O21','BASS-II · PSI-25','Olson','PMMA rod 3/8 in clear','k',15.9,28,'S','Sustained up to 28 cm/s'],
+ ['O5a','BASS-II · PSI-25','Olson','PMMA rod 1/2 in clear','k',15.1,10,'S','Burned at 5 and 10 cm/s'],
+ ['M2','BASS-II · PSI-25','Miller','PMMA slab 3 mm, 2 cm','k',22.2,13,'S','Burned while flow lowered 20 → 13 cm/s'],
+ ['M19','BASS-II · PSI-25','Miller','PMMA slab 4 mm, 2 cm','k',19.0,5,'S','Burned while flow lowered 17 → 5 cm/s']
+];
+
+// FLEX (PSI-69) experimental table, all 274 tests in order (row index + 1 = FLEX Test #).
+// fuel (M methanol, H heptane), pressure mmHg, O2, CO2, He mole fractions, D0 mm, extinction diameter mm,
+// burning rate, burn time s, test end (E extinction, D disruption, C completion). Empty = not reported / unreadable.
+const FLEX_RAW = 'M,758,0.21,0,0,1.69,0.89,0.52,4.3,D;M,762,0.21,0,0,1.86,0.94,0.6,5,E;M,764,0.21,0,0,1.61,0.92,0.58,3.2,E;M,760,0.21,0,0,2.06,,0.6,7.64,E;M,760,0.21,0,0,1.92,0.81,0.48,6.34,E;M,760,0.21,0,0,2.54,1.53,0.51,9.6,E;H,761,0.21,0,0,1.87,,0.67,5.3,D;H,762,0.21,0,0,2.95,,0.79,14.8,D;H,760,0.21,0,0,,,,,D;M,2320,0.21,0.7,0,3.86,,0.37,13.6,E;M,2319,0.21,0.7,0,3.03,,0.4,16.5,E;H,2320,0.21,0.7,0,2.74,,,,D;M,2074,0.21,0.7,0,2.59,,0.49,10.8,E;M,2056,0.21,0.7,0,3.7,,,11.3,E;M,2067,0.21,0.7,0,4.42,,,23.1,E;M,2072,0.21,0.7,0,1.66,1,0.53,3.4,E;M,1546,0.21,0.7,0,2.67,,,2.4,D;H,1554,0.21,0.7,0,2.74,1.77,0.61,8.1,E;H,539,0.34,0,0,3.39,,0.9,4.2,D;M,540,0.34,0,0,3.4,1.56,0.53,17.4,C;M,541,0.34,0,0,3.49,0.95,0.66,17.8,D;M,541,0.34,0,0,3.5,,0.65,18.2,D;H,542,0.34,0,0,3.01,,0.73,13.1,D;H,543,0.34,0,0,,,,,D;M,537,0.3,0,0,2.6,0.59,0.65,10.3,C;M,538,0.3,0,0,3.63,0.4,0.62,22.2,D;H,541,0.3,0,0,3.87,,0.64,23.8,D;H,540,0.3,0,0,3.36,,0.64,17.3,D;M,767,0.3,0,0,2.57,,0.74,10.4,C;M,769,0.3,0,0,3.26,1.32,0.59,15.6,E;H,771,0.3,0,0,3.39,,0.85,18.4,D;H,771,0.3,0,0,3.07,,0.68,14,C;M,765,0.21,0,0,2.62,1.25,0.48,11.4,E;M,768,0.21,0,0,3.89,2,0.44,27.3,E;H,768,0.21,0,0,3.85,3.34,0.43,8.9,E;M,539,0.2,0,0,2.4,1.67,0.45,7.1,E;M,534,0.34,0,0,3.31,,0.72,10.7,D;M,534,0.34,0,0,3.59,,0.71,15.3,D;H,535,0.34,0,0,2.91,0,0.8,9.9,D;M,535,0.3,0,0,3.77,,0.62,19.2,D;M,534,0.3,0,0,3.35,,0.65,14.1,D;H,535,0.3,0,0,2.92,,0.58,11.3,D;H,535,0.3,0,0,2.97,0,0.78,11.4,D;M,767,0.3,0,0,3.49,,0.63,16.6,D;M,768,0.3,0,0,2.42,1.01,0.73,6.6,E;M,770,0.21,0,0,2.78,1.08,0.54,13.1,D;H,770,0.21,0,0,3.36,,0.5,17.1,C;M,769,0.21,0,0,3.66,,0.27,23.5,D;H,765,0.21,0,0,3.46,2.78,0.59,8.6,E;H,770,0.21,0,0,3.57,2.98,0.52,8.4,E;H,771,0.21,0,0,2.41,0,0.65,8.2,C;H,771,0.3,0,0,3.53,0,0.7,18.3,D;H,770,0.21,0,0,,,,18.5,D;M,541,0.2,0,0,3.56,,0.41,29,E;M,543,0.2,0,0,3.37,2.39,0.46,20.5,D;H,544,0.2,0,0,3.56,3.04,0.44,7.9,C;H,544,0.2,0,0,3.1,2.49,0.54,6.8,E;M,773,0.18,0,0,3.69,,0.42,29.1,E;M,769,0.18,0,0,2.93,1.39,0.43,17.7,E;M,774,0.18,0,0,3.43,,0.45,23.2,E;M,774,0.18,0,0,3.68,2,0.41,25.7,E;H,762,0.18,0,0,3.43,3.17,0.39,4.8,E;H,768,0.18,0,0,2.15,0,0.51,9.6,C;H,765,0.18,0,0,2.69,2.07,0.6,5.5,E;M,766,0.15,0,0,3.37,,0.4,24.3,E;M,767,0.15,0,0,2.52,1.32,0.38,12.9,E;M,768,0.15,0,0,3.97,3.3,0.36,14.4,E;M,769,0.15,0,0,2.38,1.29,0.39,10.7,E;H,767,0.14,0,0,1.1,0,0.94,1.3,C;H,761,0.15,0,0,4.67,4.6,0.41,1.6,E;M,768,0.15,0,0,2.25,,0.4,8.4,E;H,765,0.15,0,0,1.13,,0.52,2.5,C;H,761,0.15,0,0,4.64,4.58,0.56,1.5,E;H,766,0.15,0,0,1.33,,0.77,2.3,C;M,771,0.13,0,0,2.54,1.78,0.37,9.1,E;M,770,0.13,0,0,3.21,2.78,0.37,8.9,E;M,768,0.14,0,0,3.33,2.91,0.34,8.5,E;M,766,0.14,0,0,2.66,1.66,0.35,12.9,E;H,768,0.13,0,0,2.92,2.86,0.25,1.5,E;H,770,0.13,0,0,,,,1,E;H,770,0.13,0,0,,,,1.5,E;M,765,0.13,0,0,2.84,2.39,0.35,7.5,E;M,772,0.12,0,0,,,,5.45,E;M,767,0.12,0,0,2.35,1.42,0.35,10.8,E;M,771,0.12,0,0,2.4,1.77,0.35,9.3,E;M,770,0.12,0,0,3.07,2.56,0.35,9,E;M,771,0.12,0,0,2.64,1.92,0.38,9.3,E;M,538,0.25,0.15,0,3.01,,0.53,14.8,D;M,537,0.25,0.15,0,3.7,,0.51,24,D;M,539,0.25,0.15,0,3.62,,0.53,20.1,D;M,538,0.25,0.15,0,3.51,,0.51,18,D;H,536,0.25,0.15,0,3.41,,0.55,21.7,D;H,537,0.25,0.15,0,2.48,0,0.71,8.3,D;H,534,0.24,0.2,0,3.53,2.76,0.51,10.1,E;H,534,0.24,0.2,0,3.6,3.04,0.58,8,E;H,534,0.24,0.2,0,,,,5.2,D;M,534,0.23,0.2,0,4.25,2.6,0.45,26.5,C;M,537,0.23,0.25,0,3.64,1.74,0.47,22.9,E;M,535,0.23,0.25,0,4.28,2.32,0.42,33,E;H,537,0.23,0.25,0,4.14,3.98,0.34,6.1,E;H,539,0.23,0.25,0,3.88,3.45,0.5,6.5,E;H,534,0.21,0.3,0,3.57,3.43,0.33,4.2,E;H,534,0.21,0.3,0,4,3.88,0.35,3.2,E;M,534,0.23,0.2,0,3.6,1.58,0.49,23.2,E;M,535,0.23,0.2,0,4.17,2,0.47,30.7,D;M,538,0.23,0.25,0,3.08,1.75,0.51,14.1,D;M,535,0.23,0.2,0,3.18,,0.52,15.1,D;M,538,0.23,0.25,0,3.75,,0.47,24.3,C;M,537,0.21,0.3,0,3.56,1.92,0.42,,E;M,537,0.21,0.3,0,2.83,1.57,0.45,13,E;M,537,0.21,0.3,0,3.37,2.1,0.45,16.4,C;M,531,0.21,0.3,0,3.99,2.35,0.43,25.2,C;M,535,0.2,0.35,0,4.2,2.85,0.49,18.2,E;M,,0.2,0.35,0,3.23,1.68,0.42,18.9,E;M,536,0.2,0.35,0,3.97,2.61,0.41,22.9,E;M,536,0.2,0.35,0,3.16,1.57,0.46,16.9,E;H,531,0.2,0.35,0,3.84,3.77,0.25,2.4,E;H,533,0.2,0.35,0,3.03,2.93,0.38,2.5,E;H,533,0.18,0.4,0,2.6,2.48,0.37,1.3,E;H,533,0.18,0.4,0,2.45,2.39,0.38,1.43,E;M,526,0.18,0.4,0,4.25,3.92,0.34,8,E;M,531,0.18,0.4,0,3.46,2.58,0.41,13.9,E;M,532,0.18,0.4,0,4.13,3.79,0.35,8.7,E;M,532,0.18,0.4,0,2.87,2.74,0.3,2.4,E;M,537,0.17,0.45,0,3.63,3.37,0.35,5.7,E;M,536,0.17,0.45,0,2.8,1.84,0.4,11.7,E;M,537,0.17,0.45,0,3.22,2.53,0.38,11,E;M,537,0.17,0.45,0,2.91,,0.39,11.5,E;H,536,0.17,0.45,0,3.33,3.34,0.33,0.55,E;H,537,0.17,0.45,0,2.91,2.89,0.05,0.6,E;H,764,0.24,0.2,0,1.72,0.52,0.61,4.9,D;H,765,0.24,0.2,0,2.63,0.53,0.6,12.4,D;H,767,0.24,0.2,0,3.25,0.55,0.56,19,D;H,767,0.24,0.2,0,3.66,2.88,0.56,9.2,E;H,768,0.24,0.2,0,2.78,0,0.59,10.8,C;H,768,0.24,0.2,0,3.08,,0.51,17,C;H,768,0.24,0.2,0,3.13,,0.55,17.5,D;H,769,0.24,0.2,0,,,,,D;H,768,0.24,0.2,0,1.75,,0.63,5.4,D;M,534,0.15,0.5,0,3.98,3.95,0.2,1.3,E;M,534,0.15,0.5,0,2.86,2.73,0.3,2.3,E;M,535,0.15,0.5,0,1.86,1.48,0.39,3.4,E;M,535,0.15,0.5,0,2.25,2.06,0.36,2.7,E;M,762,0.2,0.05,0,3.53,1.53,0.45,23.8,E;M,764,0.2,0.05,0,3.33,1.61,0.45,20,E;M,766,0.2,0.05,0,4.35,1.95,0.41,39.2,E;M,536,0.17,0.45,0,3.02,2.49,0.4,7.8,E;H,764,0.2,0.05,0,2.58,1.15,0.54,11.8,D;H,766,0.2,0.05,0,2.21,0.82,0.53,8.9,D;H,768,0.2,0.05,0,3.18,2.54,0.46,8,E;M,763,0.18,0.15,0,3.86,,0.36,31.3,C;M,765,0.18,0.15,0,3.33,1.23,0.43,23.2,E;M,766,0.18,0.15,0,2.78,1.19,0.42,15.7,E;H,762,0.18,0.15,0,3.7,3.6,0.34,2.2,E;H,765,0.18,0.15,0,2.73,2.52,0.39,2.7,E;H,766,0.18,0.15,0,1.34,0.45,0.48,3.2,C;M,762,0.16,0.25,0,4.24,3.96,0.3,7.6,E;M,764,0.16,0.25,0,3.7,3.22,0.37,10.1,E;M,766,0.16,0.25,0,2.71,1.34,0.38,14.9,E;M,768,0.16,0.25,0,2.77,1.52,0.38,14.8,E;M,763,0.15,0.32,0,3.72,3.5,0.28,6,E;M,764,0.15,0.32,0,3.05,2.54,0.37,8.5,E;M,766,0.15,0.32,0,2.59,1.63,0.37,11.6,E;M,766,0.15,0.32,0,2.59,1.79,0.42,8.9,E;H,765,0.18,0.15,0,1.96,1.39,0.54,3.9,E;M,761,0.14,0.36,0,3.22,3.08,0.28,3.4,E;M,762,0.14,0.36,0,2.32,1.84,0.37,5.9,E;M,763,0.21,0.15,0,3.03,1.57,0.48,15.6,D;M,766,0.21,0.15,0,3.05,1.28,0.51,16.7,E;M,767,0.21,0.15,0,3.53,1.59,0.46,23.6,E;H,760,0.18,0.15,0,3.74,3.68,0.35,2.8,E;H,762,0.18,0.15,0,2.4,1.96,0.46,4.4,E;H,762,0.18,0.15,0,1.35,0.47,0.5,3.6,D;H,532,0.24,0.2,0,2.5,0.21,0.56,11.2,D;H,532,0.24,0.2,0,2.88,,0.55,15.6,D;M,537,0.24,0.2,0,4.53,,0.46,38.2,E;M,537,0.24,0.2,0,3.02,1.35,0.52,14.5,E;H,534,0.23,0.25,0,3.32,2.61,0.5,8.9,E;H,534,0.23,0.25,0,2.07,0.48,0.57,7.5,D;H,758,0.19,0.1,0,3.4,3.13,0.41,4.5,E;H,759,0.19,0.1,0,2.48,1.68,0.49,7,E;H,759,0.19,0.1,0,1.64,0.49,0.54,5.1,D;M,534,0.23,0.25,0,3.72,,0.53,26.2,E;M,535,0.23,0.25,0,3.42,,0.51,15.8,E;M,535,0.23,0.25,0,2.8,1.33,0.51,12.7,E;M,536,0.23,0.25,0,2.47,1.21,0.52,9.2,E;M,758,0.19,0.1,0,3.38,1.29,0.47,21.8,E;M,758,0.19,0.1,0,2.47,1.08,0.46,11,E;M,761,0.18,0.15,0,3.77,1.78,0.42,30.5,E;M,765,0.18,0.15,0,2.74,0.95,0.5,14,E;M,765,0.18,0.15,0,1.76,0.81,0.46,5.5,E;M,760,0.17,0.2,0,3.46,,0.39,21.8,E;M,759,0.17,0.2,0,2.77,1.27,0.4,15.6,E;H,752,0.17,0.2,0,3.76,3.71,0.29,1.6,E;H,753,0.17,0.2,0,2.9,2.79,0.36,1.9,E;H,758,0.2,0.05,0,3.06,2.28,0.52,8.9,E;H,760,0.2,0.05,0,3.04,2.33,0.49,8.1,E;H,760,0.2,0.05,0,2.12,0.13,0.53,8.7,D;M,754,0.2,0.05,0,3.37,0.98,0.49,21,E;M,756,0.2,0.05,0,2.57,1.13,0.47,11.7,E;M,757,0.2,0.05,0,2.4,1.05,0.48,10.2,E;M,760,0.21,0,0,3.3,1.42,0.47,19.5,E;M,762,0.21,0,0,2.75,1.11,0.52,12.8,E;H,757,0.21,0,0,3.56,,0.43,23.9,D;H,757,0.21,0,0,3.58,,0.42,24,D;H,760,0.21,0,0,2.96,0.47,0.5,17.1,D;H,763,0.21,0,0,2.72,1.13,0.54,11.5,C;H,763,0.21,0,0,2.92,,0.69,12.8,C;H,760,0.16,0,0,3.34,3.18,0.34,3.4,E;H,760,0.16,0,0,,,,,E;H,760,0.16,0,0,2.52,2.13,0.42,4.5,E;H,764,0.15,0,0,2.55,2.31,0.37,3.4,E;H,760,0.14,0,0,4.16,4.15,0.24,1.6,E;H,760,0.14,0,0,1.83,,0.39,3.8,E;M,758,0.14,0,0,3.5,,0.3,26,E;M,758,0.14,0,0,2.67,1.27,0.38,15.6,E;M,759,0.13,0,0,3.46,2.96,0.36,9.5,E;M,761,0.13,0,0,2.75,1.46,0.35,16.3,E;M,762,0.12,0,0,2.6,2.09,0.36,6.9,E;M,762,0.12,0,0,1.94,1.05,0.35,7.8,E;M,764,0.12,0,0,1.84,1.04,0.38,6,E;M,759,0.2,0,0.05,2.91,1.12,0.51,14.4,E;M,760,0.2,0,0.05,,,,6,E;H,755,0.2,0,0.05,2.25,,0.57,9,C;M,753,0.19,0,0.1,2.78,,0.57,12.5,E;M,759,0.18,0,0.15,2.79,1.3,0.51,12.5,E;M,760,0.18,0,0.15,2.95,1.67,0.53,11.7,E;H,767,0.21,0,0,3.32,1.37,0.52,17.5,E;H,768,0.21,0,0,2.39,,0.57,10.6,D;H,769,0.21,0,0,3.65,2.85,0.57,9.6,E;H,759,0.19,0,0.1,2.59,,0.54,12,D;H,764,0.18,0,0.15,3.52,3.28,0.41,4.1,E;H,766,0.18,0,0.15,2.3,,0.49,9.1,C;H,767,0.18,0,0.15,2.27,,0.51,8.6,C;H,759,0.17,0,0.2,2.85,2.6,0.46,3.2,E;H,759,0.17,0,0.2,2.12,1.39,0.59,4.5,E;H,760,0.17,0,0.2,,,,1.7,D;H,760,0.17,0,0.2,1.61,,0.91,2.7,C;M,754,0.17,0,0.2,2.99,,0.49,9.1,E;M,757,0.17,0,0.2,2.9,1.42,0.51,13.1,E;M,760,0.16,0,0.25,3.4,2.79,0.51,7.9,E;M,761,0.16,0,0.25,,,,5,E;H,758,0.16,0,0.25,1.49,0.69,0.6,2.9,E;M,756,0.15,0,0.3,3.67,3.47,0.43,3.6,E;M,757,0.15,0,0.3,2.52,2.06,0.56,4,E;M,759,0.14,0,0.35,2.44,2.26,0.56,1.5,E;M,760,0.14,0,0.35,1.88,1.73,0.58,1,E;M,764,0.13,0,0.4,3.56,3.54,0.51,0.3,E;H,534,0.24,0,0.2,3.78,2.52,0.72,12.2,E;H,532,0.23,0,0.25,2.8,0.12,0.71,11.4,C;M,534,0.24,0,0.2,2.82,1.03,0.62,11.2,E;M,535,0.24,0,0.2,2.79,1.53,0.7,8.1,D;M,532,0.23,0,0.25,2.45,0.86,0.6,8.3,E;M,532,0.23,0,0.25,2.61,,0.73,6.3,D;M,532,0.21,0,0.3,3.22,,0.56,10.4,E;M,531,0.21,0,0.3,3.25,1.78,0.65,12.1,E;M,531,0.21,0,0.3,2.67,1.42,0.7,7.6,E;H,530,0.21,0,0.3,3.23,2.33,0.67,7.5,E;H,529,0.21,0,0.3,2.86,0.71,0.7,11,E;H,533,0.2,0,0.35,3.69,3.32,0.61,4.3,E;H,532,0.2,0,0.35,3.08,1.69,0.67,5.4,E;M,528,0.2,0,0.35,3.87,2.24,0.6,17.4,E;M,528,0.2,0,0.35,2.95,1.5,0.63,10.6,E;M,532,0.18,0,0.4,3.5,2.67,0.59,7.8,E;M,533,0.18,0,0.4,2.7,1.92,0.63,5.9,E;M,533,0.18,0,0.4,1.84,1.3,0.62,2.3,E;H,528,0.18,0,0.4,2.27,1.64,0.71,3.5,E;H,530,0.18,0,0.4,1.86,0.84,0.77,3.5,E;H,532,0.17,0,0.45,2.22,1.86,0.76,1.9,E;H,533,0.17,0,0.45,1.61,0.91,1.06,1.4,C;M,530,0.17,0,0.45,2.79,2.3,0.63,4,E;M,532,0.17,0,0.45,2.68,2.31,0.66,2.9,E;H,765,0.21,0,0.15,3.54,2.91,0.55,7.6,E;H,766,0.21,0,0.15,2.82,0.73,0.65,11.7,E';
+const num = s => (s === '' || s === undefined) ? null : +s;
+const FLEX = FLEX_RAW.split(';').map((r, i) => { const c = r.split(',');
+  return {n:i+1, fuel:c[0], p:num(c[1]), o2:+c[2], co2:+c[3], he:+c[4], d0:num(c[5]), dext:num(c[6]), k:num(c[7]), t:num(c[8]), end:c[9]}; });
+
+// SAME-R (PSI-101) per-material summary computed from the table: [tests, min Rt/R0, max Rt/R0]
+const SAMER = [['Kapton',29,1.38,1.48],['Silicone',22,1.30,1.36],['Lampwick',20,1.25,1.28],['Pyrell',20,1.22,1.23],['Teflon',18,1.25,1.45]];
+
+</script>
+<script>
+// FLARE-SI simulators. Outcome logic is fitted to NASA PSI data; the field view is an illustrative
+// advection-diffusion solver (not CFD). Code written with AI assistance (see About page).
+const $ = id => document.getElementById(id);
+const OUT = {S:'Burned',Q:'Low-flow extinction',B:'Blowoff',N:'No ignition'};
+const OUTC = {S:'#3ddc97',Q:'#5aa9ff',B:'#ffc24a',N:'#ff5c6c'};
+
+/* ================= SOLID-FUEL MODEL ================= */
+const O2_FLOOR = 14.0;                     // BASS-II O12: no ignition at 13.6 %
+const GRAV = {micro:{g:0,name:'Microgravity (ISS)'}, moon:{g:0.165,name:'Moon 0.17 g'}, mars:{g:0.38,name:'Mars 0.38 g'}, earth:{g:1,name:'Earth 1 g'}};
+const ubuoy = g => g <= 0 ? 0 : 30 * Math.cbrt(g);   // cm/s; 30 cm/s at 1 g, scaled with g^(1/3)
+const MAT = {
+  sibal:{geom:'t',name:'SIBAL fabric',col:'#d9cdb3'}, film:{geom:'t',name:'PMMA film',col:'#8fd0ff'},
+  rod:{geom:'k',name:'PMMA rod / slab',col:'#8fd0ff'}, silicone:{geom:null,name:'Silicone sheet',col:'#9fb3c8'}, nomex:{geom:null,name:'Nomex',col:'#c9b37a'}
+};
+const uq  = (o2,g) => (g==='t'?2:1) * 0.4 * Math.exp(-0.15*(o2-16));
+const ubo = (o2,g) => g==='t' ? 24*Math.exp(0.6*(o2-17.35)) : 15*Math.exp(0.93*(o2-15));
+function predict(o2,u,geom,g){
+  if(o2 < O2_FLOOR) return {s:'N',m:0};
+  const ue = Math.hypot(u, ubuoy(g)), lo = uq(o2,geom), hi = ubo(o2,geom);
+  if(ue < lo) return {s:'Q',m:0};
+  if(ue > hi) return {s:'B',m:0};
+  return {s:'S', m:Math.max(0.08, Math.min(1, Math.min(Math.log(ue/lo), Math.log(hi/ue))/2.5))};
+}
+function solidScore(){
+  let ok=0;
+  for(const d of SOLID){ const g=d[4],o2=d[5],u=d[6],o=d[7], p=predict(o2,u,g,0).s;
+    if(o==='S') ok += p==='S'; else if(o==='N') ok += p!=='S';
+    else if(o==='Q') ok += (p==='Q' || (uq(o2,g)>=u/2 && uq(o2,g)<=u*2));
+    else ok += (p==='B' || (ubo(o2,g)>=u/1.5 && ubo(o2,g)<=u*1.5)); }
+  return [ok, SOLID.length];
+}
+
+const NX=150, NY=70, J0=46, IX0=12, IX1=138;
+const S = {grav:'micro', mat:'rod', o2:21, logu:Math.log10(8), xf:IX0+5, I:1, view:'T', t:0, vent:false, inert:false,
+           alarmDuct:null, alarmCeil:null, tOut:null, running:false};
+let T=new Float32Array(NX*NY), O=new Float32Array(NX*NY), M=new Float32Array(NX*NY), tmp=new Float32Array(NX*NY);
+const gval = () => GRAV[S.grav].g, uval = () => Math.pow(10,S.logu);
+const fmtU = x => x<1 ? x.toFixed(2) : x<10 ? x.toFixed(1) : x.toFixed(0);
+
+function current(){
+  const m=MAT[S.mat]; if(!m.geom) return {special:true, m:0.4};
+  return predict(S.o2,uval(),m.geom,gval());
+}
+function reignite(){ T.fill(0);O.fill(0);M.fill(0); S.xf=IX0+5; S.I=1; S.t=0; S.alarmDuct=null; S.alarmCeil=null; S.tOut=null; }
+
+function advect(F, fx, buoy, dt){
+  for(let j=0;j<NY;j++) for(let i=0;i<NX;i++){
+    const k=j*NX+i, x=i-fx*dt, y=j+buoy*Math.min(1,3*T[k]+2*M[k])*dt;
+    if(x<0){ tmp[k]=0; continue; }
+    const xx=Math.min(NX-1.001,x), yy=Math.max(0,Math.min(NY-1.001,y));
+    const i0=xx|0, j0=yy|0, a=xx-i0, b=yy-j0, q=j0*NX+i0;
+    tmp[k]=(1-a)*(1-b)*F[q]+a*(1-b)*F[q+1]+(1-a)*b*F[q+NX]+a*b*F[q+NX+1];
+  }
+  F.set(tmp);
+}
+function diffuse(F, c){
+  for(let j=1;j<NY-1;j++) for(let i=1;i<NX-1;i++){ const k=j*NX+i; tmp[k]=F[k]+c*(F[k-1]+F[k+1]+F[k-NX]+F[k+NX]-4*F[k]); }
+  for(let j=1;j<NY-1;j++) for(let i=1;i<NX-1;i++){ const k=j*NX+i; F[k]=tmp[k]; }
+}
+function stepSolid(dt){
+  S.t += dt;
+  if(S.vent){ S.logu=Math.max(-1,S.logu-dt*0.6); $('u').value=S.logu; if(S.logu<=-1) S.vent=false; }
+  if(S.inert){ S.o2=Math.max(12,S.o2-dt*1.3); $('o2').value=S.o2; if(S.o2<=12) S.inert=false; }
+  const p=current(), m=MAT[S.mat], g=gval(), thin=m.geom==='t';
+  let target, margin=p.m||0;
+  if(p.special) target = S.mat==='silicone' ? (g>=1?0.8:(g>0?0.5:0.25)) : 0;
+  else target = p.s==='S' ? 1 : 0;
+  if(S.xf>=IX1) target=0;
+  S.I += (target-S.I)*Math.min(1,dt*(target<S.I?0.7:1.6)); if(S.I<0.02&&target===0) S.I=0;
+  if(S.I===0 && S.tOut===null) S.tOut=S.t; if(S.I>0.05) S.tOut=null;
+  // flame front
+  let v=0;
+  if(S.I>0.1){ if(S.mat==='silicone') v = g>0 ? 0.6*Math.sqrt(g) : 0; else if(m.geom) v = thin ? (0.6+2.4*margin)*(1+0.4*Math.sqrt(g)) : 0.12+0.3*margin; }
+  S.xf=Math.min(IX1,S.xf+v*dt*S.I);
+  // fields
+  const u=uval(), fx=2.2*Math.pow(u,0.7), buoy=22*Math.sqrt(g);
+  advect(T,fx,buoy,dt); advect(O,fx,buoy,dt); advect(M,fx,buoy,dt);
+  diffuse(T,0.16); diffuse(O,0.16); diffuse(M,0.05);
+  const cool=1-0.55*dt, rep=1-0.22*dt, fade=1-0.025*dt;
+  for(let k=0;k<NX*NY;k++){ T[k]*=cool; O[k]*=rep; M[k]*=fade; }
+  if(S.I>0){
+    const Lp=Math.round(thin?4+8*margin:6+10*margin), xf=Math.round(S.xf), soot=(0.25+0.5*margin)*(0.5+0.5*Math.sqrt(g)+0.3);
+    const rows = (thin||!m.geom) ? [J0-1,J0+1] : [J0-1];
+    for(const j of rows) for(let i=Math.max(1,xf-Lp);i<=xf;i++){ const k=j*NX+i;
+      T[k]=Math.min(1.25,T[k]+S.I*9*dt); O[k]=Math.min(0.92,O[k]+S.I*5*dt); M[k]=Math.min(1,M[k]+S.I*soot*7*dt); }
+  }
+  // detectors: return-duct band at the outflow edge, ceiling band along the top
+  let md=0, mc=0;
+  for(let j=J0-16;j<=J0+10;j++) md=Math.max(md,M[j*NX+NX-5]);
+  for(let i=30;i<NX-8;i++) mc=Math.max(mc,M[2*NX+i],M[4*NX+i]);
+  if(S.alarmDuct===null && md>0.06) S.alarmDuct=S.t;
+  if(S.alarmCeil===null && mc>0.06) S.alarmCeil=S.t;
+}
+
+const off=document.createElement('canvas'); off.width=NX; off.height=NY; const octx=off.getContext('2d'); const img=octx.createImageData(NX,NY);
+const cl = x => x<0?0:x>1?1:x;
+function renderSolid(){
+  const cv=$('cv'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height, CS=W/NX, g=gval(), w=1-Math.min(1,Math.sqrt(g)), d=img.data;
+  for(let k=0;k<NX*NY;k++){
+    let r,gg,b;
+    if(S.view==='T'){ const t=T[k];
+      const r1=cl(t*3), g1=cl(t*3-0.8)*0.9, b1=cl(t*3-2), b2=cl(t*2.6), g2=cl(t*2.4-0.5), r2=cl(t*2.6-1.15);
+      r=r1*(1-w)+r2*w; gg=g1*(1-w)+g2*w; b=b1*(1-w)+b2*w; r=0.02+r*0.98; gg=0.03+gg*0.97; b=0.06+b*0.94;
+    } else if(S.view==='O'){ const f=1-O[k]; r=0.55*(1-f)+0.02; gg=0.12+0.55*f; b=0.25+0.45*f; }
+    else { const s=cl(M[k]*1.6); r=0.03+0.7*s; gg=0.04+0.7*s; b=0.07+0.72*s; }
+    d[k*4]=r*255; d[k*4+1]=gg*255; d[k*4+2]=b*255; d[k*4+3]=255;
+  }
+  octx.putImageData(img,0,0); ctx.imageSmoothingEnabled=true; ctx.drawImage(off,0,0,W,H);
+  const m=MAT[S.mat], thin=m.geom==='t'||!m.geom, th=thin?5:14, ys=(J0+0.5)*CS, x0=IX0*CS, x1=IX1*CS, xf=S.xf*CS;
+  ctx.globalAlpha=thin?0.95:0.6; ctx.fillStyle=m.col; ctx.fillRect(x0,ys-th/2,x1-x0,th); ctx.globalAlpha=1;
+  ctx.fillStyle='rgba(25,18,14,.92)'; ctx.fillRect(x0,ys-th/2,Math.max(0,xf-x0-(thin?0:20)),th);
+  // airflow arrows
+  const u=uval(), al=14+Math.log10(u+1)*34; ctx.strokeStyle=ctx.fillStyle='rgba(170,185,210,.55)'; ctx.lineWidth=2;
+  for(let q=0;q<4;q++){ const y=60+q*95, o=(S.t*u*5)%40; ctx.beginPath(); ctx.moveTo(8+o,y); ctx.lineTo(8+o+al*0.7,y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(8+o+al*0.7,y-4); ctx.lineTo(8+o+al*0.7+7,y); ctx.lineTo(8+o+al*0.7,y+4); ctx.fill(); }
+  // detectors
+  const dA=S.alarmDuct!==null, cA=S.alarmCeil!==null;
+  ctx.fillStyle=dA?'#ff5c6c':'#3a4a66'; ctx.fillRect(W-14,(J0-16)*CS,8,26*CS);
+  ctx.fillStyle=cA?'#ff5c6c':'#3a4a66'; ctx.fillRect(30*CS,4,(NX-38)*CS,6);
+  ctx.font='12px Inter, sans-serif'; ctx.fillStyle='#c7d1e4';
+  ctx.fillText('ceiling smoke detector'+(cA?' — ALARM':''),30*CS,26);
+  ctx.save(); ctx.translate(W-20,(J0-16)*CS+150); ctx.rotate(-Math.PI/2); ctx.fillText('return-duct detector'+(dA?' — ALARM':''),0,0); ctx.restore();
+  ctx.fillStyle='#9fb0cc'; ctx.fillText('airflow '+fmtU(u)+' cm/s →',10,H-30); ctx.fillText(GRAV[S.grav].name+(g>0?'  ↓ g':''),10,H-12);
+  ctx.fillText(m.name,x0,ys+th/2+18);
+  ctx.textAlign='right'; ctx.fillText({T:'heat (relative)',O:'oxygen (relative to ambient)',M:'smoke (relative)'}[S.view],W-30,H-12); ctx.textAlign='left';
+  if(S.I===0){ ctx.font='600 15px Inter, sans-serif'; ctx.fillStyle='#e6ecf7';
+    ctx.fillText(S.mat==='nomex'?'Nomex: not ignited in SAFFIRE-II':(S.xf>=IX1?'Sample consumed':'Flame out'),x0,ys-70); }
+}
+
+function spreadInfo(p){
+  const g=gval(), m=MAT[S.mat], anchor=Math.abs(S.o2-22.1)<0.6 && Math.abs(uval()-20)<4;
+  if(S.mat==='silicone') return g>=1?['0.6–1.2 mm/s','Measured in 1 g (SAFFIRE-II)']: g>0?['unknown','No partial-gravity data']:['≈ 0','Measured in μg (SAFFIRE-II)'];
+  if(S.mat==='nomex') return ['not ignited','Measured in μg (SAFFIRE-II 2-7)'];
+  if(p.s!=='S') return ['—','no flame'];
+  if(m.geom==='t'){ if(S.mat==='sibal'&&anchor&&g===0) return ['2.1–2.6 mm/s','Measured (SAFFIRE-II 2-5, 2-6)'];
+    const ref=predict(22.1,20,'t',0).m; return ['≈ '+(2.35*p.m/ref*(1+0.4*Math.sqrt(g))).toFixed(1)+' mm/s','Estimate scaled from SAFFIRE-II']; }
+  if(anchor&&g===0) return ['0.01–0.04 mm/s','Measured regression (SAFFIRE-II 2-8)'];
+  return ['≈ '+(0.05*p.m).toFixed(3)+' mm/s','Estimate, regression-type'];
+}
+function envelope(){
+  const g=gval(), m=MAT[S.mat], u=uval();
+  if(g>=1) return ['env-m','Earth: model estimate'];
+  if(g>0) return ['env-m','Partial gravity: model estimate, no PSI data'];
+  if(!m.geom) return (Math.abs(S.o2-22.1)<0.6&&Math.abs(u-20)<4) ? ['env-ok','Measured condition'] : ['env-x','No data at this condition'];
+  return (S.o2>=13.6&&S.o2<=22.2&&u>=0.2&&u<=40) ? ['env-ok','Within data envelope'] : ['env-x','Extrapolation: outside tested range'];
+}
+function updateSolidUI(){
+  $('o2v').textContent=S.o2.toFixed(1)+' %'; $('uv').textContent=fmtU(uval())+' cm/s';
+  const p=current(), m=MAT[S.mat], g=gval(), ub=ubuoy(g); let cls,txt,msg;
+  if(p.special){
+    if(S.mat==='silicone'){ cls='q'; txt=g>=1?'BURNS (1 g)':g>0?'UNKNOWN (partial g)':'NO SPREAD (μg)';
+      msg=g>=1?'In normal gravity the SAFFIRE-II silicone samples burned with 0.6–1.2 mm/s spread.':g>0?'There are no partial-gravity tests of this material in PSI. Microgravity (no spread) and 1 g (burns) only bound the answer.':'In SAFFIRE-II (20 cm/s, about 22 % O₂) silicone ignited but the flame did not spread in microgravity, although the same material burned on Earth. Only this one condition was measured.'; }
+    else { cls='n'; txt='NOT IGNITED'; msg='In SAFFIRE-II sample 2-7 the PMMA section burned completely but the attached Nomex did not ignite (20 cm/s, about 22 % O₂). Only this one condition was measured.'; }
+    $('k2').textContent='—'; $('k3').textContent='—';
+  } else {
+    const lo=uq(S.o2,m.geom), hi=ubo(S.o2,m.geom);
+    if(p.s==='S'){ cls='s'; txt='FLAME SUSTAINED'; msg=g>0?'Buoyancy drives its own upward flow (about '+ub.toFixed(0)+' cm/s here), so the flame gets oxygen whatever the ventilation setting. Shutting off the fans does not starve this fire.':'The airflow brings enough oxygen without blowing the flame off. With no buoyancy, ventilation is the flame\'s only oxygen supply.'; }
+    if(p.s==='Q'){ cls='q'; txt='LOW-FLOW EXTINCTION'; msg='With no buoyancy, near-still air cannot carry oxygen to the flame fast enough and it starves. BASS-II rods and slabs went out at roughly 0.2–0.6 cm/s. Note that smoke also stops moving, so detectors in the air path may not see it.'; }
+    if(p.s==='B'){ cls='b'; txt='BLOWOFF'; msg=g>0?'Buoyant plus forced flow is faster than the flame chemistry can follow at this oxygen level.':'The flow is too fast for the flame chemistry at this oxygen level. BASS-II flames blew off at about 15–38 cm/s near 15–16 % O₂.'; }
+    if(p.s==='N'){ cls='n'; txt='BELOW OXYGEN LIMIT'; msg='No flame expected: BASS-II test O12 could not be ignited at 13.6 % O₂ at any flow.'; }
+    $('k2').textContent = g>0 ? (ub>lo?'none (buoyancy)':fmtU(lo)+' cm/s') : fmtU(lo)+' cm/s';
+    $('k3').textContent = hi>999 ? '>999 cm/s' : (g>0 ? (hi>ub?fmtU(Math.sqrt(hi*hi-ub*ub))+' cm/s forced':'exceeded') : fmtU(hi)+' cm/s');
+  }
+  $('state').className='pill '+cls; $('state').textContent=txt; $('explain').textContent=msg;
+  const e=envelope(); $('env').className='pill '+e[0]; $('env').textContent=e[1];
+  const sp=spreadInfo(p); $('k1').textContent=sp[0]; $('k1t').textContent=sp[1];
+  drawMap(); solidEvidence();
+}
+function updateDetectors(){
+  $('k4').textContent = S.alarmDuct!==null ? 'alarm at '+S.alarmDuct.toFixed(1)+' s' : 'no alarm';
+  $('k5').textContent = S.alarmCeil!==null ? 'alarm at '+S.alarmCeil.toFixed(1)+' s' : 'no alarm';
+  $('k6').textContent = S.I>0.05 ? 'burning, '+S.t.toFixed(0)+' s' : (S.tOut!==null ? 'out at '+S.tOut.toFixed(1)+' s' : '—');
+}
+
+const MX0=46, MX1=425, MY0=14, MY1=300, OMIN=12, OMAX=36;
+const ox = o2 => MX0+(o2-OMIN)/(OMAX-OMIN)*(MX1-MX0), oy = lu => MY1-(lu+1)/3*(MY1-MY0);
+function drawMap(){
+  const svg=$('map'), m=MAT[S.mat], g=gval(), ub=ubuoy(g); let h='';
+  for(let o=12;o<=36;o+=4) h+=`<line x1="${ox(o)}" y1="${MY0}" x2="${ox(o)}" y2="${MY1}" stroke="#1f2a42"/><text x="${ox(o)}" y="${MY1+16}" fill="#8a97b0" font-size="11" text-anchor="middle">${o}</text>`;
+  [0.1,1,10,100].forEach(v=>{ const y=oy(Math.log10(v)); h+=`<line x1="${MX0}" y1="${y}" x2="${MX1}" y2="${y}" stroke="#1f2a42"/><text x="${MX0-6}" y="${y+4}" fill="#8a97b0" font-size="11" text-anchor="end">${v}</text>`; });
+  h+=`<text x="${(MX0+MX1)/2}" y="334" fill="#8a97b0" font-size="11" text-anchor="middle">Oxygen (% by volume)</text><text x="12" y="${(MY0+MY1)/2}" fill="#8a97b0" font-size="11" text-anchor="middle" transform="rotate(-90 12 ${(MY0+MY1)/2})">Forced airflow (cm/s)</text>`;
+  h+=`<rect x="${ox(13.6)}" y="${MY0}" width="${ox(22.2)-ox(13.6)}" height="${MY1-MY0}" fill="rgba(255,255,255,.04)"/><text x="${ox(13.8)}" y="${MY0+12}" fill="#8a97b0" font-size="10">tested O₂ range</text>`;
+  h+=`<line x1="${ox(34)}" y1="${MY0}" x2="${ox(34)}" y2="${MY1}" stroke="#b7a9ff" stroke-dasharray="4 3"/><text x="${ox(34)-4}" y="${MY0+12}" fill="#b7a9ff" font-size="10" text-anchor="end">Moon-base atmosphere ≥30 %</text><line x1="${ox(30)}" y1="${MY0}" x2="${ox(30)}" y2="${MY1}" stroke="#b7a9ff" stroke-dasharray="4 3" opacity=".5"/>`;
+  if(m.geom){
+    const top=[], bot=[];
+    for(let o=O2_FLOOR;o<=OMAX+0.001;o+=0.2){
+      let lo=uq(o,m.geom), hi=ubo(o,m.geom);
+      if(g>0){ lo = ub>lo ? 0.1 : Math.sqrt(lo*lo-ub*ub); hi = hi>ub ? Math.sqrt(hi*hi-ub*ub) : 0; }
+      const l=Math.max(-1,Math.log10(Math.max(lo,1e-6))), t=Math.min(2,Math.log10(Math.max(hi,1e-6)));
+      if(t<=l) continue; top.push([ox(o),oy(t)]); bot.unshift([ox(o),oy(l)]);
+    }
+    if(top.length) h+=`<polygon points="${top.concat(bot).map(p=>p.join(',')).join(' ')}" fill="rgba(61,220,151,.16)" stroke="#3ddc97" stroke-width="1.2"/>`;
+    for(const d of SOLID){ const on=d[4]===m.geom, x=ox(d[5]), y=oy(Math.log10(d[6])), c=OUTC[d[7]], op=on?(g>0?0.35:1):0.12, t=`<title>${d[0]}: ${OUT[d[7]]} at ${d[5]} % O₂, ${d[6]} cm/s</title>`;
+      if(d[7]==='S') h+=`<circle cx="${x}" cy="${y}" r="4" fill="${c}" opacity="${op}">${t}</circle>`;
+      else if(d[7]==='Q') h+=`<path d="M${x-5},${y-4} L${x+5},${y-4} L${x},${y+5} Z" fill="${c}" opacity="${op}">${t}</path>`;
+      else if(d[7]==='B') h+=`<path d="M${x-4},${y-4} L${x+4},${y+4} M${x+4},${y-4} L${x-4},${y+4}" stroke="${c}" stroke-width="2.4" opacity="${op}">${t}</path>`;
+      else h+=`<rect x="${x-4}" y="${y-4}" width="8" height="8" fill="${c}" opacity="${op}">${t}</rect>`; }
+  } else {
+    h+=`<text x="${(MX0+MX1)/2}" y="${(MY0+MY1)/2}" fill="#8a97b0" font-size="12" text-anchor="middle">${m.name}: measured at one condition only</text><circle cx="${ox(22.1)}" cy="${oy(Math.log10(20))}" r="6" fill="${S.mat==='nomex'?'#ff5c6c':'#5aa9ff'}"/>`;
+  }
+  const cx=ox(Math.min(OMAX,S.o2)), cy=oy(S.logu);
+  h+=`<circle cx="${cx}" cy="${cy}" r="7" fill="none" stroke="#fff" stroke-width="2"/><rect id="hit" x="${MX0}" y="${MY0}" width="${MX1-MX0}" height="${MY1-MY0}" fill="transparent" style="cursor:crosshair"/>`;
+  svg.innerHTML=h;
+  $('hit').addEventListener('click',e=>{ const r=svg.getBoundingClientRect(), x=(e.clientX-r.left)*440/r.width, y=(e.clientY-r.top)*340/r.height;
+    S.o2=Math.max(12,Math.min(36,OMIN+(x-MX0)/(MX1-MX0)*(OMAX-OMIN))); S.logu=Math.max(-1,Math.min(2,(MY1-y)/(MY1-MY0)*3-1)); S.vent=S.inert=false; syncSolid(); updateSolidUI(); });
+  const sc=solidScore();
+  $('score').innerHTML=`Green area: where the model predicts a sustained flame for ${GRAV[S.grav].name}. In microgravity it reproduces <span class="score">${sc[0]}/${sc[1]}</span> curated test outcomes (the fit uses these same tests, so this is agreement, not independent validation).`;
+}
+function solidEvidence(){
+  const m=MAT[S.mat]; const L=PSI;
+  if(!m.geom){ $('ev').innerHTML = S.mat==='silicone'
+    ? `<tr><td class="mono">2-1…2-4</td><td><a href="${L('PSI-99')}" target="_blank" rel="noopener">SAFFIRE-II · PSI-99</a></td><td>Silicone 0.27–1.03 mm</td><td class="mono">21.5–22.1</td><td class="mono">20</td><td style="color:#5aa9ff">No μg spread</td><td>μg burn length ≈0; 1 g spread 0.6–1.2 mm/s</td></tr>`
+    : `<tr><td class="mono">2-7</td><td><a href="${L('PSI-99')}" target="_blank" rel="noopener">SAFFIRE-II · PSI-99</a></td><td>PMMA + Nomex 0.37 mm</td><td class="mono">22.1</td><td class="mono">20</td><td style="color:#ff5c6c">Not ignited</td><td>PMMA section consumed, Nomex not ignited</td></tr>`; return; }
+  const dist=d=>((d[5]-S.o2)/1.5)**2+((Math.log10(d[6])-S.logu)/0.35)**2;
+  $('ev').innerHTML=SOLID.filter(d=>d[4]===m.geom).sort((a,b)=>dist(a)-dist(b)).slice(0,6).map(d=>{ const acc=d[1].split('· ')[1];
+    return `<tr><td class="mono">${d[0]}</td><td><a href="${L(acc)}" target="_blank" rel="noopener">${d[1]}</a></td><td>${d[3]}</td><td class="mono">${d[5].toFixed(1)}</td><td class="mono">${d[6]}</td><td style="color:${OUTC[d[7]]};font-weight:600">${OUT[d[7]]}</td><td>${d[8]}</td></tr>`; }).join('');
+}
+function syncSolid(){ $('o2').value=S.o2; $('u').value=S.logu; $('mat').value=S.mat; $('grav').value=S.grav;
+  document.querySelectorAll('#vseg button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.view)); }
+const PRESETS = {
+  iss:{grav:'micro',mat:'rod',o2:21,u:8}, limit:{grav:'micro',mat:'rod',o2:15.5,u:20}, fabric:{grav:'micro',mat:'sibal',o2:22.1,u:20},
+  moon:{grav:'moon',mat:'rod',o2:34,u:8}, earth:{grav:'earth',mat:'rod',o2:21,u:8}, silicone:{grav:'micro',mat:'silicone',o2:22.1,u:20}
+};
+function applyPreset(n){ const p=PRESETS[n]; if(!p) return; S.grav=p.grav; S.mat=p.mat; S.o2=p.o2; S.logu=Math.log10(p.u); S.vent=S.inert=false; reignite(); syncSolid(); updateSolidUI(); }
+function initSolid(){
+  $('grav').onchange=e=>{ S.grav=e.target.value; updateSolidUI(); };
+  $('mat').onchange=e=>{ S.mat=e.target.value; reignite(); updateSolidUI(); };
+  $('o2').oninput=e=>{ S.o2=+e.target.value; S.inert=false; updateSolidUI(); };
+  $('u').oninput=e=>{ S.logu=+e.target.value; S.vent=false; updateSolidUI(); };
+  $('preset').onchange=e=>{ applyPreset(e.target.value); e.target.value=''; };
+  $('ventoff').onclick=()=>{ S.vent=true; }; $('inert').onclick=()=>{ S.inert=true; };
+  $('reignite').onclick=reignite;
+  document.querySelectorAll('#vseg button').forEach(b=>b.onclick=()=>{ S.view=b.dataset.v; syncSolid(); });
+  reignite(); syncSolid(); updateSolidUI();
+}
+
+/* ================= DROPLET SUPPRESSION MODEL (FLEX k-NN) ================= */
+const D = {fuel:'H', p:760, o2:0.21, dil:'co2', x:0, d0:3, t:0, pred:null};
+const ENDN = {E:'Extinction',D:'Disruption',C:'Completion'}, ENDC={E:'#5aa9ff',D:'#ffc24a',C:'#3ddc97'};
+function fdist(r,q){ if(r.p===null||r.d0===null) return 1e9;
+  return ((r.o2-q.o2)/0.03)**2+((r.co2-q.co2)/0.08)**2+((r.he-q.he)/0.08)**2+(Math.log(r.p/q.p)/0.25)**2+((r.d0-q.d0)/0.8)**2; }
+function knn(q, skip){
+  const c=FLEX.filter(r=>r.fuel===q.fuel&&r.n!==skip).map(r=>({r,d:fdist(r,q)})).sort((a,b)=>a.d-b.d).slice(0,7);
+  const w=c.map(x=>1/(0.3+x.d)), P={E:0,D:0,C:0}; let ws=0; c.forEach((x,i)=>{P[x.r.end]+=w[i]; ws+=w[i];}); for(const k in P) P[k]/=ws;
+  const avg=f=>{ let s=0,n=0; c.forEach((x,i)=>{ const v=f(x.r); if(v!==null&&!isNaN(v)){ s+=v*w[i]; n+=w[i]; } }); return n?s/n:null; };
+  const end=Object.keys(P).sort((a,b)=>P[b]-P[a])[0];
+  return {P,end,k:avg(r=>r.k),t:avg(r=>r.t),ratio:avg(r=>r.end==='C'?0:(r.dext!==null&&r.d0?Math.min(1,r.dext/r.d0):null)),near:c,dmin:c[0].d};
+}
+function flexLOO(){ let ok=0,n=0; for(const r of FLEX){ if(r.p===null||r.d0===null) continue; n++; ok += knn(r,r.n).end===r.end; } return [ok,n]; }
+const dq = () => ({fuel:D.fuel,p:D.p,o2:D.o2,co2:D.dil==='co2'?D.x:0,he:D.dil==='he'?D.x:0,d0:D.d0});
+function updateDrop(){
+  $('do2v').textContent=(D.o2*100).toFixed(0)+' %'; $('dxv').textContent=(D.x*100).toFixed(0)+' %'; $('dd0v').textContent=D.d0.toFixed(1)+' mm';
+  const pr=D.pred=knn(dq()); D.t=0;
+  const burned = pr.ratio!==null ? (1-Math.pow(pr.ratio,3))*100 : null;
+  let cls,txt,msg;
+  if(pr.end==='E' && pr.ratio!==null && pr.ratio>0.85){ cls='q'; txt='SUPPRESSED: FLAME GOES OUT QUICKLY'; msg='In the closest FLEX tests the flame extinguished almost immediately, with most of the droplet left unburned.'; }
+  else if(pr.end==='E'){ cls='b'; txt='BURNS, THEN SELF-EXTINGUISHES'; msg='In the closest FLEX tests the droplet burned for a while and the visible flame went out before the fuel was gone. For heptane, published FLEX results show low-temperature "cool flame" burning can continue after this point.'; }
+  else if(pr.end==='D'){ cls='n'; txt='BURNS UNTIL DISRUPTION'; msg='In the closest FLEX tests the droplet kept burning until the test ended by disruption. The atmosphere did not suppress the flame.'; }
+  else { cls='n'; txt='BURNS TO COMPLETION'; msg='In the closest FLEX tests the droplet burned until the fuel was gone. The atmosphere did not suppress the flame.'; }
+  $('dstate').className='pill '+cls; $('dstate').textContent=txt; $('dexplain').textContent=msg;
+  const far=pr.dmin>2.5; $('denv').className='pill '+(far?'env-x':'env-ok'); $('denv').textContent=far?'Extrapolation: no close FLEX test':'Close FLEX tests exist';
+  $('dk1').textContent='E '+(pr.P.E*100).toFixed(0)+' % · D '+(pr.P.D*100).toFixed(0)+' % · C '+(pr.P.C*100).toFixed(0)+' %';
+  $('dk2').textContent=pr.t!==null?pr.t.toFixed(1)+' s':'—'; $('dk3').textContent=pr.k!==null?pr.k.toFixed(2)+' mm²/s':'—';
+  $('dk4').textContent=burned!==null?burned.toFixed(0)+' %':'—';
+  $('dev').innerHTML=pr.near.slice(0,6).map(x=>{ const r=x.r; return `<tr><td class="mono">FLEX ${r.n}</td><td>${r.fuel==='M'?'Methanol':'Heptane'}</td><td class="mono">${r.p} mmHg</td><td class="mono">${(r.o2*100).toFixed(0)}</td><td class="mono">${(r.co2*100).toFixed(0)}</td><td class="mono">${(r.he*100).toFixed(0)}</td><td class="mono">${r.d0}</td><td class="mono">${r.dext??'—'}</td><td class="mono">${r.t??'—'}</td><td style="color:${ENDC[r.end]};font-weight:600">${ENDN[r.end]}</td></tr>`; }).join('');
+  drawFlexMap();
+}
+function drawFlexMap(){
+  const X0=46,X1=425,Y0=14,Y1=300, fx=o=>X0+(o-0.10)/(0.36-0.10)*(X1-X0), fy=d=>Y1-d/0.75*(Y1-Y0); let h='';
+  for(let o=0.12;o<=0.361;o+=0.04) h+=`<line x1="${fx(o)}" y1="${Y0}" x2="${fx(o)}" y2="${Y1}" stroke="#1f2a42"/><text x="${fx(o)}" y="${Y1+16}" fill="#8a97b0" font-size="11" text-anchor="middle">${(o*100).toFixed(0)}</text>`;
+  for(let d=0;d<=0.75;d+=0.25) h+=`<line x1="${X0}" y1="${fy(d)}" x2="${X1}" y2="${fy(d)}" stroke="#1f2a42"/><text x="${X0-6}" y="${fy(d)+4}" fill="#8a97b0" font-size="11" text-anchor="end">${d*100}</text>`;
+  h+=`<text x="${(X0+X1)/2}" y="334" fill="#8a97b0" font-size="11" text-anchor="middle">Oxygen (%)</text><text x="12" y="${(Y0+Y1)/2}" fill="#8a97b0" font-size="11" text-anchor="middle" transform="rotate(-90 12 ${(Y0+Y1)/2})">${D.dil==='he'?'Helium':'CO₂'} added (%)</text>`;
+  const key=D.dil==='he'?'he':'co2', other=D.dil==='he'?'co2':'he';
+  FLEX.filter(r=>r.fuel===D.fuel&&r[other]===0).forEach(r=>{ const jx=((r.n*37)%9-4)*0.9, jy=((r.n*53)%9-4)*0.9, band=r.p!==null&&Math.abs(Math.log(r.p/D.p))<0.2;
+    h+=`<circle cx="${fx(r.o2)+jx}" cy="${fy(r[key])+jy}" r="${1.6+(r.d0||2.5)*0.8}" fill="${ENDC[r.end]}" opacity="${band?0.85:0.18}"><title>FLEX ${r.n}: ${ENDN[r.end]}, ${r.p} mmHg, D0 ${r.d0} mm, burn ${r.t} s</title></circle>`; });
+  h+=`<circle cx="${fx(D.o2)}" cy="${fy(D.x)}" r="8" fill="none" stroke="#fff" stroke-width="2"/>`;
+  $('fmap').innerHTML=h;
+  const lo=flexLOO(); $('fscore').innerHTML=`Each dot is one FLEX test (size = droplet diameter; faded = other pressure). Leave-one-out check: the 7-nearest-neighbour rule predicts the recorded test end for <span class="score">${lo[0]}/${lo[1]}</span> tests.`;
+}
+function renderDrop(dt){
+  const cv=$('dcv'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height, pr=D.pred; if(!pr) return;
+  const tb=pr.t||8, k=pr.k||0.5, speed=Math.max(1,tb/6); D.t+=dt*speed; if(D.t>tb+2.5*speed) D.t=0;
+  const tt=Math.min(D.t,tb), d2=Math.max(0.02,D.d0*D.d0-k*tt), d=Math.sqrt(d2), out=D.t>=tb, fadeI=out?Math.max(0,1-(D.t-tb)/(1.2*speed)):1;
+  ctx.fillStyle='#04070e'; ctx.fillRect(0,0,W,H);
+  const cx=W/2, cy=H/2, px=16, rf=d*px*(1.6+1.2*D.o2/0.21);
+  if(fadeI>0){ const g=ctx.createRadialGradient(cx,cy,rf*0.55,cx,cy,rf*1.25);
+    g.addColorStop(0,'rgba(60,120,255,0)'); g.addColorStop(0.55,`rgba(90,150,255,${0.55*fadeI})`); g.addColorStop(0.75,`rgba(${D.fuel==='H'?'255,190,110':'120,170,255'},${0.35*fadeI})`); g.addColorStop(1,'rgba(60,120,255,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,rf*1.25,0,7); ctx.fill(); }
+  ctx.strokeStyle='#55627c'; ctx.beginPath(); ctx.moveTo(cx-140,cy); ctx.lineTo(cx+140,cy); ctx.stroke();
+  ctx.fillStyle='#cfe6ff'; ctx.beginPath(); ctx.arc(cx,cy,Math.max(1.5,d*px/2),0,7); ctx.fill();
+  ctx.fillStyle='#9fb0cc'; ctx.font='12px Inter, sans-serif';
+  ctx.fillText('t = '+tt.toFixed(1)+' s   D = '+d.toFixed(2)+' mm',12,20); ctx.fillText('playback ×'+speed.toFixed(1),12,H-12);
+  if(out){ ctx.fillStyle='#e6ecf7'; ctx.font='600 14px Inter, sans-serif'; ctx.fillText(pr.end==='E'?'Visible flame out':pr.end==='D'?'Disruption':'Fuel consumed',12,42); }
+}
+function initDrop(){
+  $('dfuel').onchange=e=>{D.fuel=e.target.value;updateDrop();}; $('dp').onchange=e=>{D.p=+e.target.value;updateDrop();};
+  $('ddil').onchange=e=>{D.dil=e.target.value;updateDrop();}; $('do2').oninput=e=>{D.o2=+e.target.value/100;updateDrop();};
+  $('dx').oninput=e=>{D.x=+e.target.value/100;updateDrop();}; $('dd0').oninput=e=>{D.d0=+e.target.value;updateDrop();};
+  $('dmoon').onclick=()=>{ D.p=535; D.o2=0.34; D.x=0; $('dp').value=535; $('do2').value=34; $('dx').value=0; updateDrop(); };
+  updateDrop();
+}
+
+/* ================= LOOP ================= */
+let lastT=0, simTab='solid';
+function simLoop(t){
+  const dt=Math.min(0.05,(t-lastT)/1000||0.016); lastT=t;
+  if(S.running){ if(simTab==='solid'){ const act=S.vent||S.inert; stepSolid(dt); renderSolid(); updateDetectors(); if(act) updateSolidUI(); } else renderDrop(dt); }
+  requestAnimationFrame(simLoop);
+}
+
+</script>
+<script>
+// FLARE-SI site logic: routing, dashboard ranking, data tables. Written with AI assistance (see About page).
+const PAGES = ['home','dashboard','data','simulation','safety','about'];
+const PHC = {Solid:'#ffb27a',Droplet:'#5aa9ff',Gas:'#b7a9ff',Aerosol:'#3ddc97',Model:'#8a97b0'};
+const HAB = {
+  station:{name:'Space station',hint:'Microgravity, about 21 % O₂ at 1 atm, forced ventilation everywhere.',w:{flow:3,solid:2,scale:1}},
+  transit:{name:'Transit vehicle',hint:'Small sealed capsule in microgravity. A fire is large relative to the cabin, so scale matters.',w:{scale:3,solid:2,flow:2}},
+  base:{name:'Moon / Mars base',hint:'Partial gravity with an oxygen-rich, low-pressure atmosphere (30 % O₂ or more, 10.2 psi or less).',w:{hi:3,lowp:3,pg:3,solid:1}},
+  rover:{name:'Pressurised rover',hint:'Same atmosphere as the base in a very small volume, in partial gravity.',w:{hi:3,lowp:3,pg:2,scale:1,solid:1}}
+};
+const CON = {
+  all:{name:'All',hint:'Overall fire-safety relevance.'},
+  prev:{name:'Prevention',hint:'Material flammability and oxygen limits.',i:0},
+  det:{name:'Detection',hint:'Smoke properties and transport.',i:1},
+  sup:{name:'Suppression',hint:'Extinction limits and suppressant gases.',i:2},
+  model:{name:'Model-ready data',hint:'Tables with per-test quantitative outcomes for predictive models.'}
+};
+const FNAME = {hi:'covers elevated oxygen',lowp:'covers reduced pressure',pg:'relevant to partial gravity',solid:'burns solid materials',scale:'realistic fire size',flow:'varies airflow',quant:'per-test numbers in the table'};
+const PNAME = ['prevention','detection','suppression'];
+const U = {hab:'station', con:'all', sel:null, sort:'acr', dir:1};
+
+function scoreInv(v){
+  const parts=[]; const c=CON[U.con];
+  if(U.con==='all') v.pil.forEach((p,i)=>{ if(p) parts.push([5*p,'relevant to '+PNAME[i]]); });
+  else if(U.con==='model') parts.push([4*Math.max(...v.pil),'fire-safety relevance']);
+  else if(v.pil[c.i]) parts.push([12*v.pil[c.i],(v.pil[c.i]===3?'directly about ':'supports ')+PNAME[c.i]]);
+  for(const k in HAB[U.hab].w) if(v.f[k]) parts.push([HAB[U.hab].w[k]*v.f[k],FNAME[k]]);
+  if(v.f.quant) parts.push([(U.con==='model'?6:2)*v.f.quant,FNAME.quant]);
+  parts.push([2*Math.log10(v.rows+1),'']);
+  if(U.con!=='all'&&U.con!=='model'&&!v.pil[c.i]) return {s:0,why:'not about '+PNAME[c.i]};
+  const s=parts.reduce((a,p)=>a+p[0],0);
+  return {s, why:parts.filter(p=>p[1]).sort((a,b)=>b[0]-a[0]).slice(0,3).map(p=>p[1]).join(' · ')};
+}
+function renderDash(){
+  $('habseg').innerHTML=Object.entries(HAB).map(([k,h])=>`<button data-k="${k}" class="${k===U.hab?'on':''}">${h.name}</button>`).join('');
+  $('conseg').innerHTML=Object.entries(CON).map(([k,h])=>`<button data-k="${k}" class="${k===U.con?'on':''}">${h.name}</button>`).join('');
+  $('habhint').textContent=HAB[U.hab].hint; $('conhint').textContent=CON[U.con].hint;
+  document.querySelectorAll('#habseg button').forEach(b=>b.onclick=()=>{U.hab=b.dataset.k;U.sel=null;renderDash();});
+  document.querySelectorAll('#conseg button').forEach(b=>b.onclick=()=>{U.con=b.dataset.k;U.sel=null;renderDash();});
+  const r=INV.map(v=>({v,...scoreInv(v)})).sort((a,b)=>b.s-a.s), top=r[0].s||1;
+  if(!U.sel) U.sel=r[0].v.id;
+  $('ranklist').innerHTML=r.filter(x=>x.s>0).map((x,i)=>`<div class="rank ${x.v.id===U.sel?'on':''}" data-id="${x.v.id}"><div class="no">${i+1}</div><div style="flex:1"><b>${x.v.acr}</b> <span class="tag ${x.v.phase}">${x.v.phase}</span><span class="mono" style="float:right;color:var(--accent)">${Math.round(100*x.s/top)}</span><div class="bar"><i style="width:${100*x.s/top}%"></i></div><div class="why">${x.why}</div></div></div>`).join('');
+  document.querySelectorAll('.rank').forEach(e=>e.onclick=()=>{U.sel=e.dataset.id;renderDash();});
+  const v=INV.find(x=>x.id===U.sel), dots=n=>'●'.repeat(n)+'○'.repeat(3-n);
+  $('detail').innerHTML=`<h3>${v.id} · ${v.yrs}</h3><h4 style="font-size:18px">${v.acr}: ${v.title}</h4><span class="tag ${v.phase}">${v.phase}</span><span class="tag">${v.rowType}, ${v.rows} rows</span><span class="tag">${v.pubs} publications</span><span class="tag">${v.gb>=1000?(v.gb/1000).toFixed(1)+' TB':v.gb+' GB'} in PSI</span>
+   <p>${v.sum}</p><div class="card" style="background:#0a1120"><h3>What it means for fire safety</h3><p style="margin:0">${v.ins}</p></div>
+   <dl><dt>Hardware</dt><dd>${v.hw}</dd><dt>Fuels and samples</dt><dd>${v.fuels}</dd><dt>Conditions</dt><dd>${v.o2?`O₂ ${v.o2[0]}–${v.o2[1]} %; `:''}${v.cond}</dd><dt>What varied</dt><dd>${v.vars}</dd><dt>Measurements</dt><dd>${v.meas}</dd>
+   <dt>Pillars</dt><dd class="mono" style="font-size:12px">prevention ${dots(v.pil[0])} · detection ${dots(v.pil[1])} · suppression ${dots(v.pil[2])}</dd>
+   <dt>Features</dt><dd>${Object.keys(FNAME).filter(k=>v.f[k]).map(k=>`<span class="tag">${FNAME[k]} ${dots(v.f[k])}</span>`).join('')||'—'}</dd>
+   <dt>Source</dt><dd><a href="${PSI(v.id)}" target="_blank" rel="noopener">Open ${v.id} in PSI</a> · DOI ${v.doi}</dd></dl>
+   ${v.id==='PSI-25'||v.id==='PSI-99'||v.id==='PSI-98'?'<a class="cta" data-go="simulation" role="link" tabindex="0">Explore in the solid-fuel simulator</a>':''}${v.id==='PSI-69'?'<a class="cta" data-go="simulation" role="link" tabindex="0" data-tab="drop">Explore in the droplet simulator</a>':''}`;
+  bindLinks($('detail'));
+}
+function renderCoverage(){
+  const rows=INV.filter(v=>v.o2).sort((a,b)=>({Solid:0,Droplet:1,Gas:2}[a.phase]-{Solid:0,Droplet:1,Gas:2}[b.phase])||a.o2[1]-b.o2[1]);
+  const X0=170,X1=980,Y0=20,RH=26, fx=o=>X0+(o-10)/80*(X1-X0), H=Y0+rows.length*RH; let h='';
+  h+=`<rect x="${fx(30)}" y="${Y0-6}" width="${fx(40)-fx(30)}" height="${H-Y0+6}" fill="rgba(183,169,255,.14)" stroke="#b7a9ff" stroke-dasharray="4 3"/>`;
+  for(let o=10;o<=90;o+=10) h+=`<line x1="${fx(o)}" y1="${Y0-6}" x2="${fx(o)}" y2="${H}" stroke="#1f2a42"/><text x="${fx(o)}" y="${H+16}" fill="#8a97b0" font-size="11" text-anchor="middle">${o} %</text>`;
+  h+=`<line x1="${fx(21)}" y1="${Y0-6}" x2="${fx(21)}" y2="${H}" stroke="#e6ecf7" stroke-dasharray="2 3"/><text x="${fx(21)}" y="${Y0-10}" fill="#e6ecf7" font-size="10" text-anchor="middle">air 21 %</text><text x="${fx(35)}" y="${Y0-10}" fill="#b7a9ff" font-size="10" text-anchor="middle">surface habitats</text>`;
+  rows.forEach((v,i)=>{ const y=Y0+i*RH+6; h+=`<text x="${X0-10}" y="${y+10}" fill="#c7d1e4" font-size="12" text-anchor="end">${v.acr}</text><rect x="${fx(v.o2[0])}" y="${y}" width="${Math.max(4,fx(v.o2[1])-fx(v.o2[0]))}" height="13" rx="4" fill="${PHC[v.phase]}"><title>${v.acr}: ${v.o2[0]}–${v.o2[1]} % O₂</title></rect><text x="${fx(v.o2[1])+8}" y="${y+10}" fill="#8a97b0" font-size="11">${v.o2[0]}–${v.o2[1]} %</text>`; });
+  h+=`<text x="${(X0+X1)/2}" y="${H+34}" fill="#8a97b0" font-size="11" text-anchor="middle">Oxygen concentration covered by each experimental table</text>`;
+  $('cov').setAttribute('viewBox','0 0 1000 '+(H+42)); $('cov').innerHTML=h;
+}
+const COLS=[['acr','Investigation'],['phase','Fuel type'],['yrs','Years'],['rows','Rows'],['o2','O₂ %'],['cond','Other conditions'],['meas','Measurements in table'],['pubs','Pubs'],['gb','Data GB']];
+function renderCmp(){
+  const val=(v,k)=>k==='o2'?(v.o2?v.o2[1]:-1):v[k];
+  const r=INV.slice().sort((a,b)=>{ const x=val(a,U.sort),y=val(b,U.sort); return (typeof x==='number'?x-y:String(x).localeCompare(String(y)))*U.dir; });
+  $('cmp').innerHTML='<thead><tr>'+COLS.map(c=>`<th class="sort" data-k="${c[0]}">${c[1]}${U.sort===c[0]?(U.dir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr></thead><tbody>'+
+    r.map(v=>`<tr><td><a href="${PSI(v.id)}" target="_blank" rel="noopener"><b>${v.acr}</b></a><br><span class="hint">${v.id}</span></td><td><span class="tag ${v.phase}">${v.phase}</span></td><td>${v.yrs}</td><td class="mono">${v.rows}</td><td class="mono">${v.o2?v.o2[0]+'–'+v.o2[1]:'—'}</td><td>${v.cond}</td><td>${v.meas}</td><td class="mono">${v.pubs}</td><td class="mono">${v.gb}</td></tr>`).join('')+'</tbody>';
+  document.querySelectorAll('#cmp th').forEach(t=>t.onclick=()=>{ const k=t.dataset.k; if(U.sort===k) U.dir*=-1; else {U.sort=k; U.dir=(k==='acr'||k==='phase'||k==='cond'||k==='meas'||k==='yrs')?1:-1;} renderCmp(); });
+}
+const INSIGHTS=[
+ ['Airflow sets the flammable range in microgravity','A flame on a solid survives only between a low-flow limit and a blowoff limit. BASS-II located both: about 0.2–0.6 cm/s for rods and slabs, and 15–38 cm/s near 15–16 % O₂.','BASS-II · PSI-25 · 41 curated outcomes','iss'],
+ ['Normal-gravity screening does not transfer directly','SAFFIRE-II measured the same samples in both gravity levels. Silicone: 0.6–1.2 mm/s on Earth, no spread in microgravity. SIBAL fabric: 2.1–2.6 mm/s in microgravity.','SAFFIRE-II · PSI-99 · 9 samples','silicone'],
+ ['There is an oxygen floor for flaming','One BASS-II rod could not be ignited at 13.6 % O₂ at any airflow, and flames at 15–16 % were easily blown off.','BASS-II · PSI-25 · tests O12, O7–O9','limit'],
+ ['Suppressant gases work, and the data can rank them','In FLEX, 186 of 274 droplet flames extinguished before the fuel was gone. Heptane in 17 % O₂ with 45 % CO₂ went out in under a second with the droplet almost intact.','FLEX · PSI-69 · tests 129–130','drop'],
+ ['Moon-base atmospheres are the largest gap','Only 17 FLEX tests sit at 30–34 % O₂ near 10.4 psi, and none of those droplets self-extinguished (15 ended in disruption, 2 burned to completion). No solid-fuel table goes above 22.2 % O₂ and PSI has no partial-gravity data.','FLEX tests 19–28, 37–43; coverage chart','moon'],
+ ['Detection depends on airflow, and on the material','SAME-R overheated five spacecraft materials at 0–8 cm/s airflow to characterise their smoke. In microgravity smoke goes where the ventilation takes it.','SAME-R · PSI-101 · 109 tests','iss']
+];
+function renderInsights(){
+  $('insights').innerHTML=INSIGHTS.map((x,i)=>`<div class="card"><h4>${i+1}. ${x[0]}</h4><p>${x[1]}</p><div class="ev">Evidence: ${x[2]}</div>${x[3]==='drop'?'<a class="cta ghost" data-go="simulation" role="link" tabindex="0" data-tab="drop">Test it in the droplet simulator</a>':`<button class="cta ghost" data-preset="${x[3]}">Test it in the simulator</button>`}</div>`).join('');
+  bindLinks($('insights'));
+}
+function renderData(){
+  $('dtab').innerHTML='<thead><tr><th>Accession</th><th>Investigation</th><th>Table type</th><th>Rows</th><th>What the table holds</th><th>Used for</th><th>DOI</th></tr></thead><tbody>'+
+   INV.map(v=>`<tr><td><a href="${PSI(v.id)}" target="_blank" rel="noopener">${v.id}</a></td><td><b>${v.acr}</b><br><span class="hint">${v.title}</span></td><td>${v.rowType}</td><td class="mono">${v.rows}</td><td>${v.meas}</td><td>${v.id==='PSI-25'||v.id==='PSI-99'||v.id==='PSI-98'?'Dashboard + solid-fuel simulator':v.id==='PSI-69'?'Dashboard + droplet simulator':'Dashboard'}</td><td class="mono" style="font-size:11px">${v.doi}</td></tr>`).join('')+'</tbody>';
+  $('samer').textContent=SAMER.map(s=>`${s[0]} ${s[2].toFixed(2)}–${s[3].toFixed(2)} (${s[1]} tests)`).join('; ');
+}
+function renderHome(){
+  const rows=INV.reduce((a,v)=>a+v.rows,0), gb=INV.reduce((a,v)=>a+v.gb,0), pubs=INV.reduce((a,v)=>a+v.pubs,0);
+  $('homestats').innerHTML=[[INV.length,'NASA combustion investigations summarised and ranked'],[rows.toLocaleString('en-US'),'experimental-table rows reviewed'],[SOLID.length+FLEX.length,'individual tests behind the two simulators'],[pubs,'linked publications indexed · '+(gb/1000).toFixed(0)+' TB of raw data mapped']]
+   .map(s=>`<div class="card stat"><div class="v">${s[0]}</div><div class="k">${s[1]}</div></div>`).join('');
+  $('weights').innerHTML='Habitat weights: '+Object.values(HAB).map(h=>`<b>${h.name}</b> (${Object.entries(h.w).map(([k,w])=>FNAME[k]+' ×'+w).join(', ')})`).join('; ')+'.';
+}
+function setTab(t){ simTab=t; $('tab-solid').style.display=t==='solid'?'':'none'; $('tab-drop').style.display=t==='drop'?'':'none';
+  document.querySelectorAll('#tabseg button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); }
+function bindLinks(root){
+  root.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{ setTab('solid'); applyPreset(b.dataset.preset); go('simulation'); });
+  }
+function go(p,fromHash){
+  if(!PAGES.includes(p)) p='home';
+  PAGES.forEach(x=>$('page-'+x).classList.toggle('on',x===p));
+  document.querySelectorAll('nav a').forEach(x=>x.classList.toggle('on',x.dataset.go===p));
+  S.running = p==='simulation'; window.scrollTo(0,0);
+  if(!fromHash){ try{ if(location.hash!=='#'+p) history.replaceState(null,'','#'+p); }catch(e){} }
+}
+function route(){ let p=''; try{ p=location.hash.replace('#',''); }catch(e){} go(p,true); }
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-go]'); if(!el) return;
+  e.preventDefault(); if(el.dataset.tab) setTab(el.dataset.tab); go(el.dataset.go);
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'){ const el=e.target.closest&&e.target.closest('[data-go]'); if(el){ e.preventDefault(); el.click(); } } });
+renderHome(); renderDash(); renderCoverage(); renderCmp(); renderInsights(); renderData();
+initSolid(); initDrop(); bindLinks(document.getElementById('page-safety'));
+document.querySelectorAll('#tabseg button').forEach(b=>b.onclick=()=>setTab(b.dataset.t));
+window.addEventListener('hashchange',route); route(); requestAnimationFrame(simLoop);
+
+</script>
+</body>
+</html>
