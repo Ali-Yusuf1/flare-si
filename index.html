@@ -10,7 +10,7 @@
 :root{--bg:#070b14;--panel:#0e1524;--panel2:#121b2e;--line:#1f2a42;--text:#e6ecf7;--muted:#8a97b0;--soft:#c7d1e4;--accent:#ff8a3d;--blue:#5aa9ff;--green:#3ddc97;--red:#ff5c6c;--amber:#ffc24a;--violet:#b7a9ff}
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#16223d 0%,var(--bg) 60%) fixed;color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:1.5}
-a{color:var(--blue)}[data-go]{cursor:pointer}a[data-go]:not(.cta){text-decoration:underline}nav a[data-go]{text-decoration:none}
+a{color:var(--blue)}[data-go]{cursor:pointer}a[data-go]:not(.cta){text-decoration:underline}nav a[data-go]:not(.cta){text-decoration:none}
 nav{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 28px;background:rgba(7,11,20,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
 nav .brand{font-weight:700;font-size:17px;margin-right:18px}nav .brand span{color:var(--accent)}
 nav a{color:var(--muted);text-decoration:none;font-weight:600;padding:7px 12px;border-radius:8px}
@@ -71,6 +71,17 @@ ul.notes{margin:0;padding-left:18px}ul.notes li{margin:5px 0;color:var(--soft)}
 .pillar{border-left:3px solid var(--accent);padding-left:14px;margin:14px 0}
 footer{padding:18px 28px 30px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);max-width:1500px;margin:0 auto}
 svg text{font-family:Inter,sans-serif}
+
+#qa input[type=text]{flex:1;min-width:0;background:#0a1120;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font:inherit;font-size:15px}
+#qa input[type=text]:focus{outline:2px solid var(--accent);outline-offset:1px}
+#qaform{display:flex;gap:8px;align-items:stretch}#qaform .cta{margin:0}
+.qachip{background:#0a1120;border:1px solid var(--line);color:var(--soft);border-radius:999px;padding:5px 12px;font:inherit;font-size:12.5px;cursor:pointer;margin:8px 6px 0 0}.qachip:hover{border-color:var(--accent);color:var(--text)}
+.qahead{margin:16px 0 4px}.qah{margin:18px 0 4px;font-size:15px}.qastat{margin:2px 0 8px;color:var(--soft);font-family:'JetBrains Mono',monospace;font-size:12.5px}
+.qanote{margin:8px 0;padding:8px 12px;border-left:3px solid var(--amber);background:#0a1120;color:var(--soft);border-radius:0 8px 8px 0}
+.qainv{padding:8px 0;border-bottom:1px solid var(--line)}.qasmall{color:var(--muted);font-size:12.5px}
+.qalink{background:none;border:0;color:var(--blue);cursor:pointer;font:inherit;padding:6px 0;text-decoration:underline}
+.qabtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.qabtns .cta{margin:0}
+#qatext{width:100%;background:#0a1120;color:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:12px}
 </style>
 </head>
 <body>
@@ -89,7 +100,7 @@ svg text{font-family:Inter,sans-serif}
   <div class="grid g4" style="margin-top:22px" id="homestats"></div>
   <h2 class="sec">What you can do here</h2>
   <div class="grid g3">
-    <div class="card"><h4>Rank the research for your mission</h4><p>Pick a habitat (station, transit vehicle, surface base, rover) and a concern (prevention, detection, suppression). The dashboard ranks all investigations and explains each score.</p><a data-go="dashboard" role="link" tabindex="0">Dashboard →</a></div>
+    <div class="card"><h4>Ask the data, rank the research</h4><p>Ask a question and get the matching test records, with nothing predicted or interpreted. Or pick a habitat and a concern, and the dashboard ranks all investigations and explains each score.</p><a data-go="dashboard" role="link" tabindex="0">Dashboard →</a></div>
     <div class="card"><h4>See what data exists, and what does not</h4><p>Every table we used, what its columns contain, how we cleaned it, and where the gaps are, including the oxygen-rich, low-pressure atmosphere planned for the Moon.</p><a data-go="data" role="link" tabindex="0">Data →</a></div>
     <div class="card"><h4>Test a fire scenario</h4><p>Change gravity, oxygen, ventilation and material and watch the flame, oxygen and smoke respond. Every outcome is linked to the closest real NASA tests and flagged when it is an extrapolation.</p><a data-go="simulation" role="link" tabindex="0">Simulation →</a></div>
   </div>
@@ -104,7 +115,14 @@ svg text{font-family:Inter,sans-serif}
 <!-- ================= DASHBOARD ================= -->
 <section class="page" id="page-dashboard">
   <h1>Investigation dashboard</h1>
-  <p class="lead">Summarise, rank and interpret NASA's microgravity combustion investigations for a specific fire-safety need.</p>
+  <p class="lead">Ask the data a question, or rank NASA's microgravity combustion investigations for a specific fire-safety need.</p>
+  <div class="card" id="qa" style="margin-top:14px">
+    <h3>Evidence assistant · ask the data</h3>
+    <form id="qaform"><input id="qain" type="text" autocomplete="off" aria-label="Question" placeholder="Ask about tests, materials or conditions, e.g. heptane with CO₂ at 17 % oxygen"><button class="cta" type="submit">Ask</button></form>
+    <div id="qaex"></div>
+    <div class="hint">Answers are assembled from the NASA PSI tables by fixed retrieval rules. No generative model runs on this page, so every number is quoted from a table row and nothing is predicted or interpreted. Add the word “report” to get a compiled summary. English and Turkish keywords are understood.</div>
+    <div id="qaout"></div>
+  </div>
   <div class="grid g2" style="margin-top:14px">
     <div class="card"><h3>1 · Where will the crew live?</h3><div class="seg" id="habseg"></div><div class="hint" id="habhint"></div></div>
     <div class="card"><h3>2 · What do you need to know?</h3><div class="seg" id="conseg"></div><div class="hint" id="conhint"></div></div>
@@ -298,17 +316,18 @@ svg text{font-family:Inter,sans-serif}
   <h1>About, methods and disclosures</h1>
   <div class="grid g2" style="margin-top:14px">
     <div class="card"><h3>Use of artificial intelligence</h3><ul class="notes">
-      <li>AI assistant used: <b>Claude (Anthropic)</b>.</li>
-      <li><b>Code:</b> the website, both simulators and the ranking logic were written with AI assistance and reviewed by the team.</li>
-      <li><b>Data:</b> retrieval of the PSI tables, the curation of the 41 solid-fuel outcomes from BASS-II free-text logs, and the data-quality review were AI-assisted. Every curated row carries its PSI test ID for checking.</li>
-      <li><b>Text:</b> investigation summaries, interpretations and the project report were drafted with AI assistance from the PSI tables and metadata.</li>
-      <li>No AI-generated images, video or audio are used. No NASA logos or mission insignia are used.</li>
-      <li>The dashboard's interpretations are pre-generated and fixed; the site does not call an AI model while you use it. Rankings come from the transparent scoring rule below.</li></ul></div>
+      <li>AI tool used during development: <b>Claude (Anthropic)</b>, a large language model.</li>
+      <li><b>Code:</b> the website, both simulators, the ranking rule and the evidence assistant were generated with the AI tool to the team's requirements. Each script carries a comment saying so.</li>
+      <li><b>Data:</b> the AI tool retrieved the PSI tables, extracted the 41 solid-fuel outcomes from BASS-II free-text logs and reviewed table quality. NASA's values were not altered. Each extracted row keeps its PSI test ID so anyone can check it against the source table.</li>
+      <li><b>Text:</b> investigation summaries, the "what it means" interpretations and the project report were drafted with the AI tool from PSI tables and metadata.</li>
+      <li><b>Not AI-generated:</b> all experimental values (NASA PSI). No AI-generated images, video or audio. No NASA logos or mission insignia.</li>
+      <li><b>At run time:</b> no AI model is called. The evidence assistant is a rule-based search over the loaded tables, so it cannot invent values. Rankings come from the scoring rule shown here, and the interpretations on the dashboard are fixed text, kept separate from the assistant's answers.</li></ul></div>
     <div class="card"><h3>Ranking rule</h3><p>Each investigation has a 0–3 relevance to prevention, detection and suppression, and 0–3 feature levels: elevated oxygen, reduced pressure, solid fuels, large scale, airflow varied, partial-gravity relevance, and per-test quantitative outcomes in the table.</p>
       <p class="mono" style="font-size:12px;color:var(--soft)">score = 12 × pillar relevance (or 5 × each pillar for "All") + Σ habitat weight × feature + (6 or 2) × quantitative + 2 × log₁₀(rows + 1)</p>
       <div id="weights" class="hint"></div><p class="hint">Relevance and feature levels were assigned by the team from each table and its metadata. They are judgements, shown openly on each investigation's detail card.</p></div>
     <div class="card"><h3>Limitations</h3><ul class="notes">
       <li>Only experimental tables were analysed, not raw video or sensor data.</li>
+      <li>The evidence assistant understands keywords, not free language. It returns per-test rows for BASS-II, SAFFIRE and FLEX, and table descriptions for the other investigations.</li>
       <li>The solid-fuel limits are fitted to 41 outcomes and checked against the same tests; there is no independent validation set yet.</li>
       <li>Partial-gravity and Earth modes are model estimates. The solid-fuel model has no pressure dependence.</li>
       <li>The field view is illustrative, not a CFD solution.</li>
@@ -939,6 +958,197 @@ renderHome(); renderDash(); renderCoverage(); renderCmp(); renderInsights(); ren
 initSolid(); initDrop(); bindLinks(document.getElementById('page-safety'));
 document.querySelectorAll('#tabseg button').forEach(b=>b.onclick=()=>setTab(b.dataset.t));
 window.addEventListener('hashchange',route); route(); requestAnimationFrame(simLoop);
+
+</script>
+<script>
+/* ===== Evidence assistant =====
+   Rule-based retrieval over the NASA PSI tables loaded on this page. No generative model runs here:
+   every value shown is quoted from a table row, and the only arithmetic is counting rows and taking min/max.
+   Code written with AI assistance (see About page). */
+// SAFFIRE-II (PSI-99) experimental table, as published. All samples at 20 cm/s airflow.
+const SAFF2 = [
+ ['2-1','Silicone','0.27 mm','Concurrent','~21.5','Insignificant','~0','n/a','Complete','Acceleratory'],
+ ['2-2','Silicone','0.61 mm','Concurrent','~22.1','Insignificant','~0','n/a','7.6 cm','1.2 mm/s'],
+ ['2-3','Silicone','1.03 mm','Concurrent','~22.1','Insignificant','~0','n/a','~0','n/a'],
+ ['2-4','Silicone','037 mm (as written)','Opposed','~22.1','Insignificant','~0','n/a','Complete','0.6 mm/s'],
+ ['2-5','Cotton-Fiberglass (SIBAL)','037 mm (as written)','Concurrent','~22.1','145 s','29 cm','2.1 mm/s','Complete','Acceleratory'],
+ ['2-6','(blank in table; follows 2-5)','037 mm (as written)','Concurrent','~22.1','115 s','29 cm','2.6 mm/s','Complete','Acceleratory'],
+ ['2-7','PMMA & Nomex','0.85 and 0.37 mm','Concurrent','~22.1','140 s','5 cm & 0 (table note: PMMA consumed, Nomex not ignited)','n/a (Nomex)','~0 (Nomex)','n/a (Nomex)'],
+ ['2-8','PMMA','See Fig. 5','Concurrent','22.1 to 22.0','600 s','~10 cm (visible damage)','table note: flames anchored, regression 0.01 to 0.04 mm/s','Complete','Acceleratory'],
+ ['2-9','(blank in table; follows 2-8)','1 cm','Concurrent','22.0 to 21.9','900 s','~10 cm','table note: flames anchored, regression 0.01 to 0.04 mm/s','Complete','Acceleratory']
+];
+const QA = (() => {
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const TR = [['oksijen','oxygen'],['duman','smoke'],['sondur','suppress'],['sonme','extinction'],['sonen','extinguished'],['sonuyor','extinguished'],['malzeme','material'],['kumas','fabric'],['damlacik','droplet'],['basinc','pressure'],['hava akisi','airflow'],['havalandirma','ventilation'],['tutusma','ignition'],['yayilma','spread'],['rapor','report'],['ozet','summary'],['karsilastir','compare'],['kac','how many'],['helyum','helium'],['karbondioksit','co2'],['metanol','methanol'],['heptan','heptane'],['algila','detect'],['dedektor','detector'],['onleme','prevention'],['yercekimi','gravity'],['ay ussu','moon base'],['silikon','silicone'],['kati','solid'],['hangi','which'],['deney','investigation'],['arastirma','investigation'],['uzeri','above'],['ustu','above'],['fazla','above'],['altinda','below'],['dusuk','below'],['ucurul','blowoff']];
+  function norm(s){
+    let q = ' ' + s.toLowerCase().normalize('NFD').replace(/\p{M}/gu,'').replace(/ı/g,'i').replace(/₂/g,'2').replace(/[≥]/g,'>=').replace(/[≤]/g,'<=').replace(/[–—]/g,'-') + ' ';
+    q = q.replace(/%\s*(\d+(?:[.,]\d+)?)/g,'$1 %').replace(/(\d),(\d)/g,'$1.$2');
+    for (const [a,b] of TR) q = q.replace(new RegExp('\\b'+a+'[a-z]*','g'), b);
+    return q;
+  }
+  const N = '(\\d+(?:\\.\\d+)?)', GAP = '(?:\\s|of|=|:|is|at|above|below|over|under|>=|<=|>|<|than|more|less|least|most)*';
+  function cond(q, names, unit){
+    const nm = '(?:'+names+')', u = unit ? '\\s*'+unit : '\\s*%?';
+    let m, lo, hi, span;
+    if ((m = new RegExp(N+'\\s*(?:-|to|and)\\s*'+N+u+'\\s*'+nm).exec(q)) || (m = new RegExp(nm+GAP+N+'\\s*(?:-|to|and)\\s*'+N).exec(q))) return {min:+m[1], max:+m[2], txt:m[1]+'–'+m[2]};
+    m = new RegExp(N+u+'\\s*(?:or\\s+)?(?:more|above|less|below|over|under)?\\s*'+nm).exec(q) || new RegExp(nm+GAP+N+'(?!\\d)(?!\\s*%?\\s*(?:o2|oxygen|co2|carbon|helium|atm|psi|cm))').exec(q);
+    if (!m) return null;
+    const v = +m[1]; span = q.slice(Math.max(0, m.index-22), m.index+m[0].length+22);
+    if (/above|over|more|at least|greater|higher|>=|>/.test(span)) return {min:v, max:Infinity, txt:'≥ '+v};
+    if (/below|under|less|at most|lower|<=|</.test(span)) return {min:-Infinity, max:v, txt:'≤ '+v};
+    return {eq:v, txt:String(v)};
+  }
+  const within = (x, c, tol) => x !== null && (c.eq !== undefined ? Math.abs(x-c.eq) <= tol : x >= c.min-1e-9 && x <= c.max+1e-9);
+  const ALIAS = [['PSI-25',/bass[\s-]*(ii|2)\b/],['PSI-26',/bass\b(?![\s-]*(ii|2|fgm))/],['PSI-98',/saffire[\s-]*(i|1)\b/],['PSI-99',/saffire[\s-]*(ii|2)\b/],['PSI-100',/saffire[\s-]*(iii|3)\b/],['PSI-68',/flex[\s-]*2\b/],['PSI-69',/flex\b(?![\s-]*2)/],['PSI-159',/cfi[\s-]*g\b/],['PSI-39',/cfi\b(?![\s-]*g)|cool flames? investigation/],['PSI-101',/same[\s-]*r\b/],['PSI-47',/daft/],['PSI-20',/\bbre\b|burning rate emulator/],['PSI-10',/flame design/],['PSI-107',/spice|smoke point/],['PSI-106',/\bslice\b/],['PSI-22',/\be-?field|electric/],['PSI-21',/\bcld\b|coflow laminar/],['PSI-23',/\bs-flame/],['PSI-62',/\bfgm\b|flamelet/]];
+  const STOP = new Set('which what with tests test data show list about that have were there experiment experiments investigation investigations report summary compare many does from this give results fire flame flames space nasa combustion microgravity where when above below over under more less than least most oxygen percent conditions condition recorded table tables values value burned burn their them they into your please make create compile'.split(' '));
+  const rg = a => { const lo = Math.min(...a), hi = Math.max(...a); return lo === hi ? String(lo) : lo+'–'+hi; };
+
+  function ask(raw){
+    const q = norm(raw), has = re => re.test(q), R = {q:raw, chips:[], invs:[], blocks:[], notes:[], compare:null};
+    // --- investigations named explicitly
+    let named = ALIAS.filter(a => a[1].test(q)).map(a => a[0]);
+    if (/saffire\b(?![\s-]*(i|1|2|3))/.test(q)) named.push('PSI-98','PSI-99','PSI-100');
+    if (/\bSAME\b(?!-R)/.test(raw)) named.push('PSI-102');
+    for (const m of q.matchAll(/psi[\s-]*(\d+)/g)) named.push('PSI-'+m[1]);
+    named = [...new Set(named)].filter(id => INV.some(v => v.id === id));
+    // --- conditions
+    const o2 = cond(q, '(?<![a-z])o2\\b|oxygen'), cCO2 = cond(q, 'co2|carbon dioxide'), cHe = cond(q, 'helium|\\bhe\\b');
+    const flow = cond(q, 'cm\\/s', ''), pAtm = cond(q, 'atm\\b', ''), pPsi = cond(q, 'psi\\b(?!-)', '');
+    const conv = (c, f) => c && (c.eq !== undefined ? {eq:c.eq*f, txt:c.txt} : {min:c.min*f, max:c.max*f, txt:c.txt});
+    const press = conv(pAtm, 760) || conv(pPsi, 760/14.696);
+    let o2c = o2; const moon = has(/moon base|lunar base|surface habitat|moon-base/);
+    if (o2c && (o2c.eq !== undefined ? o2c.eq : Math.max(isFinite(o2c.min)?o2c.min:0, isFinite(o2c.max)?o2c.max:0)) <= 1) o2c = conv(o2c, 100);
+    if (!o2c && moon){ o2c = {min:30, max:Infinity, txt:'≥ 30'}; R.chips.push('Moon-base atmosphere read as O₂ ≥ 30 % (challenge statement)'); }
+    else if (o2c) R.chips.push('O₂ '+o2c.txt+' %');
+    if (press) R.chips.push('pressure '+(pAtm?pAtm.txt+' atm':pPsi.txt+' psi'));
+    if (flow) R.chips.push('airflow '+flow.txt+' cm/s');
+    // --- datasets wanted
+    const fuel = has(/heptane/) ? 'H' : has(/methanol/) ? 'M' : null;
+    const useCO2 = has(/co2|carbon dioxide/), useHe = has(/helium/);
+    const matRe = [[/pmma|plastic|acrylic/,/PMMA/i,'PMMA'],[/\brods?\b/,/rod/i,'rods'],[/\bslabs?\b/,/slab/i,'slabs'],[/\bfilms?\b/,/film/i,'films'],[/sibal|fabric|cotton/,/SIBAL/i,'SIBAL fabric'],[/silicone/,/silicone/i,'silicone'],[/nomex/,/nomex/i,'Nomex']].filter(m => m[0].test(q));
+    const out = {Q:has(/low-flow|starv|extinction|extinguish|went out|goes out/), B:has(/blowoff|blow-off|blown|blew/), N:has(/no ignition|not ignit|did not ignite|could not be ignited|fail/), S:has(/sustain|\bburned\b|kept burning/), D:has(/disruption/), C:has(/completion|burned out/)};
+    const anyOut = Object.values(out).some(Boolean);
+    let wFlex = has(/droplet|suppress|co2|carbon dioxide|helium|heptane|methanol|dilut|pressure|atm\b|psi\b|liquid/) || named.includes('PSI-69');
+    let wSolid = has(/solid|material|pmma|plastic|acrylic|\brods?\b|\bslabs?\b|\bfilms?\b|sibal|fabric|cotton|airflow|ventilation|blowoff|blow-off|blew|cm\/s|low-flow|flammab/) || named.some(id => ['PSI-25','PSI-98'].includes(id));
+    let wSaff = has(/spread|silicone|nomex|1-g|1 g\b|normal gravity|earth/) || named.includes('PSI-99');
+    const wSmoke = has(/smoke|aerosol|particle|detect|kapton|teflon|lampwick|pyrell|dust/) || named.some(id => ['PSI-101','PSI-102'].includes(id));
+    if (!wFlex && !wSolid && !wSaff && !wSmoke && !named.length && (o2c || anyOut)) wFlex = wSolid = true;
+    if (named.length && !named.some(id => ['PSI-25','PSI-98','PSI-99'].includes(id))) wSolid = wSolid && !named.includes('PSI-69') ? wSolid : false;
+    if (named.length && named.every(id => id !== 'PSI-69') && !has(/droplet|heptane|methanol/)) wFlex = false;
+    if (fuel) R.chips.push(fuel === 'H' ? 'heptane' : 'methanol');
+    if (useCO2) R.chips.push('CO₂ '+(cCO2 ? cCO2.txt+' %' : 'added')); if (useHe) R.chips.push('helium '+(cHe ? cHe.txt+' %' : 'added'));
+    matRe.forEach(m => R.chips.push(m[2]));
+    const outNames = {Q:'low-flow extinction / extinction',B:'blowoff',N:'no ignition',S:'burned',D:'disruption',C:'completion'};
+    Object.keys(out).filter(k => out[k]).forEach(k => R.chips.push('outcome: '+outNames[k]));
+    // --- solid-fuel outcomes
+    if (wSolid){
+      let rows = SOLID.filter(d => (!o2c || within(d[5], o2c, 0.6)) && (!flow || within(d[6], flow, Math.max(0.3, (flow.eq||0)*0.25))) && matRe.every(m => m[1].test(d[3])));
+      const sk = ['S','Q','B','N'].filter(k => out[k]); if (sk.length) rows = rows.filter(d => sk.includes(d[7]));
+      const src = named.filter(id => ['PSI-25','PSI-98','PSI-99'].includes(id)); if (src.length) rows = rows.filter(d => src.some(id => d[1].includes(id)));
+      if (rows.length){
+        const cnt = k => rows.filter(d => d[7] === k).length, o = rows.map(d => d[5]), f = rows.map(d => d[6]);
+        R.blocks.push({title:'Solid-fuel test outcomes (BASS-II, SAFFIRE)', n:rows.length,
+          stats:[`Outcomes: ${cnt('S')} burned, ${cnt('Q')} low-flow extinction, ${cnt('B')} blowoff, ${cnt('N')} no ignition`, `O₂ ${rg(o)} %`, `Airflow ${rg(f)} cm/s`],
+          note:'Rows are the 41 tests whose table log states an unambiguous outcome. Airflow in cm/s is the logged value, or converted from the logged fan setting where only that was recorded (see Data page). The log note paraphrases the table entry.',
+          cols:['Test','Investigation','Material','O₂ %','Airflow cm/s','Outcome','Log note'], rows:rows.map(d => [d[0], d[1], d[3], d[5], d[6], OUT[d[7]], d[8]])});
+        ['PSI-25','PSI-99','PSI-98'].forEach(id => { if (rows.some(d => d[1].includes(id))) R.invs.push(id); });
+      } else R.notes.push('No curated solid-fuel test matches these conditions. The solid-fuel tables used here cover 13.6–22.2 % O₂.');
+    }
+    // --- FLEX droplets
+    if (wFlex){
+      let rows = FLEX.filter(r => (!fuel || r.fuel === fuel) && (!o2c || within(r.o2*100, o2c, 0.6)) && (!press || within(r.p, press, (press.eq||0)*0.12))
+        && (!useCO2 || (cCO2 ? within(r.co2*100, cCO2, 3) : r.co2 > 0)) && (!useHe || (cHe ? within(r.he*100, cHe, 3) : r.he > 0)));
+      const sk = [out.Q && 'E', out.D && 'D', out.C && 'C'].filter(Boolean); if (sk.length) rows = rows.filter(r => sk.includes(r.end));
+      if (rows.length){
+        const cnt = k => rows.filter(r => r.end === k).length, t = rows.map(r => r.t).filter(x => x !== null), d = rows.map(r => r.d0).filter(x => x !== null), nn = x => x === null ? '—' : x;
+        R.blocks.push({title:'FLEX droplet tests (PSI-69)', n:rows.length,
+          stats:[`Test end: ${cnt('E')} extinction, ${cnt('D')} disruption, ${cnt('C')} completion`, t.length ? `Burn time ${rg(t)} s (${t.length} reported)` : 'Burn time not reported', d.length ? `Initial diameter ${rg(d)} mm` : ''].filter(Boolean),
+          note:'All columns are quoted from the FLEX experimental table. A dash means the cell is empty or unreadable in the table.',
+          cols:['FLEX test','Fuel','Pressure mmHg','O₂ %','CO₂ %','He %','D₀ mm','Extinction D mm','Burning rate','Burn time s','Test end'],
+          rows:rows.map(r => [r.n, r.fuel === 'M' ? 'Methanol' : 'Heptane', nn(r.p), Math.round(r.o2*100), Math.round(r.co2*100), Math.round(r.he*100), nn(r.d0), nn(r.dext), nn(r.k), nn(r.t), ENDN[r.end]])});
+        R.invs.push('PSI-69');
+      } else R.notes.push('No FLEX test matches these conditions. FLEX covers 12–34 % O₂, CO₂ up to 70 % and helium up to 45 %.');
+    }
+    // --- SAFFIRE-II samples
+    if (wSaff){
+      let rows = SAFF2.filter(s => matRe.every(m => m[1].test(s[1]) || (m[2]==='PMMA' && /2-9/.test(s[0])) || (m[2]==='SIBAL fabric' && /2-6/.test(s[0]))));
+      if (o2c) rows = rows.filter(() => within(22, o2c, 1.2));
+      if (rows.length){ R.blocks.push({title:'SAFFIRE-II samples (PSI-99), all at 20 cm/s airflow', n:rows.length, stats:[],
+          note:'Quoted from the SAFFIRE-II experimental table, which reports the same samples in microgravity and in 1 g.',
+          cols:['Sample','Material','Thickness','Flow direction','O₂ %','Burn time','μg burn length','μg spread','1-g burn length','1-g spread rate'], rows}); R.invs.push('PSI-99'); }
+    }
+    // --- smoke
+    if (wSmoke){
+      const mats = SAMER.filter(s => !has(/kapton|teflon|lampwick|pyrell|silicone/) || new RegExp(s[0].toLowerCase()).test(q));
+      R.blocks.push({title:'SAME-R smoke tests by material (PSI-101)', n:mats.reduce((a,s) => a+s[1], 0), stats:[],
+        note:'Rt/R0 is reported as it appears in the table. The table does not define this column, so no meaning is attached to it here.',
+        cols:['Material','Tests','Rt/R0 min','Rt/R0 max'], rows:mats.map(s => [s[0], s[1], s[2], s[3]])});
+      R.invs.push('PSI-101','PSI-102','PSI-47');
+    }
+    // --- investigations by topic
+    const pil = [has(/prevent|flammab|material|ignit/), has(/detect|smoke|aerosol|particle|dust|alarm/), has(/suppress|extinguish|extinction|dilut|co2|helium/)];
+    const phase = {Droplet:has(/droplet|liquid/), Solid:has(/solid|material|fabric|plastic/), Gas:has(/\bgas\b|gaseous|burner/), Aerosol:has(/smoke|aerosol|dust/)};
+    const toks = q.split(/[^a-z0-9-]+/).filter(w => w.length >= 4 && !STOP.has(w));
+    const scored = INV.map(v => { const text = (v.acr+' '+v.title+' '+v.fuels+' '+v.cond+' '+v.vars+' '+v.meas+' '+v.hw).toLowerCase(); let s = 0;
+      pil.forEach((p,i) => { if (p && v.pil[i] >= 2) s += v.pil[i]; }); if (phase[v.phase]) s += 2;
+      toks.forEach(w => { if (text.includes(w)) s += 2; });
+      if (o2c && v.o2 && (o2c.eq !== undefined ? (o2c.eq >= v.o2[0] && o2c.eq <= v.o2[1]) : (v.o2[1] >= o2c.min && v.o2[0] <= o2c.max))) s += 3;
+      if (o2c && (!v.o2 || (o2c.eq === undefined && (v.o2[1] < o2c.min || v.o2[0] > o2c.max)))) s = Math.min(s, 1);
+      return [v.id, s]; }).filter(x => x[1] >= 3).sort((a,b) => b[1]-a[1]).slice(0,5).map(x => x[0]);
+    R.invs = [...new Set([...named, ...R.invs, ...(named.length || R.blocks.length ? [] : scored)])].slice(0,7);
+    if (named.length >= 2) R.compare = named.slice(0,4);
+    if (has(/partial gravity|moon|mars\b|lunar|reduced gravity/)) R.notes.push('The PSI experimental tables used here contain no partial-gravity combustion tests. The challenge statement says PSI currently holds none.');
+    named.filter(id => !['PSI-25','PSI-98','PSI-99','PSI-69','PSI-101'].includes(id)).forEach(id => R.notes.push(`Per-test rows of ${INV.find(v => v.id === id).acr} are not loaded in this assistant. Its entry below describes the table; open the PSI record for the rows.`));
+    R.report = has(/report|summary|summar/);
+    R.empty = !R.invs.length && !R.blocks.length;
+    return R;
+  }
+  const inv = id => INV.find(v => v.id === id);
+  const CMP = [['Years', v => v.yrs],['Hardware', v => v.hw],['Table', v => v.rowType+', '+v.rows+' rows'],['Fuels and samples', v => v.fuels],['O₂ range', v => v.o2 ? v.o2[0]+'–'+v.o2[1]+' %' : 'not in table'],['Other conditions', v => v.cond],['What varied', v => v.vars],['Measurements', v => v.meas],['Publications in PSI', v => v.pubs],['DOI', v => v.doi]];
+  const DISC = 'Every value is quoted from a NASA PSI experimental table. Counts and min–max ranges are computed from the rows listed. Nothing is predicted, estimated or interpreted.';
+  function table(cols, rows, lim){ const show = lim ? rows.slice(0,lim) : rows;
+    return '<div class="tw"><table><thead><tr>'+cols.map(c => '<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+show.map(r => '<tr>'+r.map((c,i) => `<td${typeof c === 'number' || i === 0 ? ' class="mono"' : ''}>${esc(c)}</td>`).join('')+'</tr>').join('')+'</tbody></table></div>'; }
+  function html(R){
+    if (R.empty) return '<p class="explain">No matching records in the loaded tables.'+(R.notes.length ? ' '+R.notes.map(esc).join(' ') : '')+' Try naming an investigation (BASS-II, FLEX, SAFFIRE-II), a material or fuel (PMMA, SIBAL, heptane), a condition (17 % oxygen, 0.7 atm) or an outcome (extinction, blowoff).</p>';
+    let h = '<div class="qahead"><b>Question read as:</b> '+(R.chips.length ? R.chips.map(c => '<span class="tag">'+esc(c)+'</span>').join('') : '<span class="tag">topic search</span>')+'</div>';
+    R.notes.forEach(n => h += '<p class="qanote">'+esc(n)+'</p>');
+    R.blocks.forEach((b,i) => { h += `<h4 class="qah">${esc(b.title)} · ${b.n} ${b.cols[1]==='Tests'?'tests':'rows'}</h4>`+(b.stats.length ? '<p class="qastat">'+b.stats.map(esc).join(' · ')+'</p>' : '')+
+      `<div id="qab${i}">`+table(b.cols, b.rows, 8)+'</div>'+(b.rows.length > 8 ? `<button class="qalink" data-qashow="${i}">Show all ${b.rows.length} rows</button>` : '')+'<p class="hint">'+esc(b.note)+'</p>'; });
+    if (R.compare) h += '<h4 class="qah">Side by side</h4>'+table(['', ...R.compare.map(id => inv(id).acr+' ('+id+')')], CMP.map(c => [c[0], ...R.compare.map(id => c[1](inv(id)))]));
+    if (R.invs.length) h += '<h4 class="qah">Investigations behind this answer</h4>'+R.invs.map(id => { const v = inv(id);
+      return `<div class="qainv"><b>${esc(v.acr)}</b> <span class="tag ${v.phase}">${v.phase}</span> <a href="${PSI(v.id)}" target="_blank" rel="noopener">${v.id}</a> · DOI ${v.doi}<br><span class="qasmall">${esc(v.sum)} <b>Table:</b> ${esc(v.rowType)}, ${v.rows} rows. <b>Measurements:</b> ${esc(v.meas)}.</span></div>`; }).join('');
+    h += '<div class="qabtns"><button class="cta" data-qa="report">Compile report</button>'+(R.blocks.length ? '<button class="cta ghost" data-qa="csv">Copy data as CSV</button>' : '')+'<span id="qamsg" class="hint"></span></div><p class="hint">'+DISC+'</p><div id="qarep"></div>';
+    return h;
+  }
+  function md(R){
+    const mt = (cols, rows) => '| '+cols.join(' | ')+' |\n|'+cols.map(() => '---').join('|')+'|\n'+rows.map(r => '| '+r.map(c => String(c).replace(/\|/g,'/')).join(' | ')+' |').join('\n')+'\n';
+    let s = '# FLARE-SI evidence report\n\n**Question:** '+R.q+'\n\n**Read as:** '+(R.chips.join('; ') || 'topic search')+'\n\n**Compiled:** '+new Date().toISOString().slice(0,10)+' · **Source:** NASA Physical Sciences Informatics repository experimental tables (CC0-1.0), retrieved 14 November 2026.\n\n**Method:** '+DISC+'\n';
+    if (R.notes.length) s += '\n## Coverage notes\n\n'+R.notes.map(n => '- '+n).join('\n')+'\n';
+    R.blocks.forEach(b => { s += '\n## '+b.title+' ('+b.n+')\n\n'+(b.stats.length ? b.stats.map(x => '- '+x).join('\n')+'\n\n' : '')+mt(b.cols, b.rows.slice(0,60))+(b.rows.length > 60 ? '\n(+'+(b.rows.length-60)+' more rows; use "Copy data as CSV" for all)\n' : '')+'\n_'+b.note+'_\n'; });
+    if (R.compare) s += '\n## Side by side\n\n'+mt(['', ...R.compare.map(id => inv(id).acr)], CMP.map(c => [c[0], ...R.compare.map(id => c[1](inv(id)))]));
+    if (R.invs.length) s += '\n## Investigations\n\n'+R.invs.map(id => { const v = inv(id); return `- **${v.acr}** (${v.id}, ${v.title}; ${v.yrs}). ${v.sum} Hardware: ${v.hw}. Fuels: ${v.fuels}. Conditions: ${v.o2 ? 'O₂ '+v.o2[0]+'–'+v.o2[1]+' %; ' : ''}${v.cond}. Measurements: ${v.meas}. Table: ${v.rowType}, ${v.rows} rows. DOI ${v.doi}. ${PSI(v.id)}`; }).join('\n')+'\n';
+    return s;
+  }
+  const csv = R => R.blocks.map(b => [b.title, b.cols, ...b.rows].map(r => (Array.isArray(r) ? r : [r]).map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n')).join('\n\n');
+  let last = null;
+  function copy(text, okMsg){ const m = $('qamsg'); const done = ok => { if (m) m.textContent = ok ? okMsg : 'Copy was blocked by the browser. Select the text and copy it manually.'; };
+    try { navigator.clipboard.writeText(text).then(() => done(true), () => done(false)); } catch(e){ done(false); } }
+  function showReport(){ $('qarep').innerHTML = '<h4 class="qah">Report (Markdown)</h4><textarea id="qatext" readonly rows="16"></textarea><div class="qabtns"><button class="cta ghost" data-qa="copyrep">Copy report</button></div>'; $('qatext').value = md(last); }
+  function run(text){ if (!text.trim()) return; $('qain').value = text; last = ask(text); $('qaout').innerHTML = html(last); if (last.report && !last.empty) showReport(); }
+  function init(){
+    const EX = ['PMMA rod tests where the flame blew off','Heptane with CO₂ at 17 % oxygen','Which investigations cover smoke detection?','Compare BASS-II and SAFFIRE-II','Report: droplet tests at oxygen above 30 %','Silicone spread in microgravity and 1 g'];
+    $('qaex').innerHTML = EX.map(e => '<button class="qachip" type="button">'+esc(e)+'</button>').join('');
+    $('qaform').addEventListener('submit', e => { e.preventDefault(); run($('qain').value); });
+    $('qa').addEventListener('click', e => { const t = e.target;
+      if (t.classList.contains('qachip')) run(t.textContent);
+      else if (t.dataset.qashow){ const b = last.blocks[+t.dataset.qashow]; $('qab'+t.dataset.qashow).innerHTML = table(b.cols, b.rows); t.remove(); }
+      else if (t.dataset.qa === 'report') showReport();
+      else if (t.dataset.qa === 'csv') copy(csv(last), 'Data copied as CSV.');
+      else if (t.dataset.qa === 'copyrep') { copy(md(last), 'Report copied.'); $('qatext').select(); } });
+  }
+  return {ask, init, md, csv, run};
+})();
+QA.init();
 
 </script>
 </body>
